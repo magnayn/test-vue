@@ -10,8 +10,9 @@ container:
   image: node
 
 steps:
-  - script: |
+  - script: |    
       cd asset_viewer
+      npm -v
       npm i
       npm run build
     displayName: "Package package"
