@@ -20,9 +20,6 @@
   "peerDependencies": {
     "vue": "^3.2.21"
   },
-  "publishConfig": {
-    "registry": "http://localhost:4873"
-  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
