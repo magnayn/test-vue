@@ -1,0 +1,24 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - main
+
+container:
+  image: node
+
+steps:
+  - script: |
+      cd asset_viewer
+      npm i
+      npm run build
+    displayName: "Package package"
+  - task: Npm@1
+    displayName: "Publish NPM"
+    inputs:
+      command: "publish"
+      workingDir: "asset_viewer"
+      publishRegistry: "useFeed"
+      publishFeed: 'a04e6147-5a39-4a72-a0b8-91b2618bf5b4/4792db2d-3846-4d2f-abfe-bb9b059fe75f'
