@@ -1,8 +1,7 @@
 {
-  "name": "@swg/lib",
+  "name": "swglib",
   "description": "UI Components for SWG",
   "version": "0.1.4",
-  "private": false,
   "main": "dist/library.js",
   "module": "dist/library.mjs",
   "files": [

@@ -60,7 +60,7 @@ buttonClick() {
 
     const model = xktLoader.load({          // Returns an Entity that represents the model
     id: "myModel",
-    src: "https://github.com/xeokit/xeokit-sdk/blob/master/assets/models/xkt/v8/ifc/WestRiverSideHospital/architectural.ifc.xkt?raw=true",
+    src: "http://localhost:8000/xeokit-sdk/assets/models/xkt/v8/ifc/Duplex.ifc.xkt",
     //src: "./models/xkt/v2/WestRiverSideHospital/architectural.xkt",
     edges: true
 });
