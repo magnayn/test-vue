@@ -474,7 +474,7 @@ function viewer_ajaxresults(result){
   if(result.indexOf('Security Alert') >= 0 ){alert(result.replace('<BR>',' '));}
   else{  if (result.substring(0, 8) =='*FLRSVG*'){
      document.getElementById('navBIRDSEYEdiv').innerHTML = result.substring(8,9999999);   
-     var svg_doc = document.getElementById('navBIRDSEYEdiv').children[0];
+     var svg_doc = document.getElementById('navBIRDSEYEdiv')?.children[0];
         for(var child=svg_doc.firstChild; child!==null; child=child.nextSibling) {    
            if(NAV_loadedrooms.indexOf(','+child.id+',')>-1){     
                child.setAttribute('fill', '#1fa0f0');     }   }  } }}document.getElementById('navmodeELEV').innerHTML = 'FIRST';
@@ -897,7 +897,24 @@ export default defineComponent({
 
     // Load XKT..
     this.LoadXKT();
-    go(this);
+    
+    (document.getElementById("itemId") as HTMLInputElement).value = this.model.default_object;
+    
+    //SetupGUI();
+
+
+    //document.getElementById('navBIRDSEYE').onload = GUI_setSVGassetpos;
+    this.GUI_setSVGassetpos();
+
+
+
+    //Set actions for part checkboxes
+    // for (let i = 1; i <= this.model.partsCount; i++) {
+    //     document.getElementById("navPARTS" + i)!.onclick = this.GUI_navmodePARTS;
+    // }
+
+    setInterval(this.GUI_refreshSVGcampos, 1000);
+
 
     this.createContextMenu();
 
@@ -1955,6 +1972,529 @@ setObserverHeight(height: number) {
         }
       }
     },
+
+    
+ ADBGoToItem3d(entAabbF) {
+
+    console.log("ADBGoToItem3d");
+
+    const camera = this.viewer.scene.camera;
+    const idx = camera.xUp ? 0 : (camera.yUp ? 1 : 2); // Find the right axis for "up"
+    //if (canStandOnTypes[metaObjectTypeF]) {
+    //  worldPos[idx] = worldPos[idx] + 1;
+    //}
+    this.viewer.cameraFlight.flyTo({
+        eye: this.worldPos,
+        look: this.mode == "3dOf2d" ? math.addVec3(this.worldPos, this.viewer.camera.worldForward, []) : null,
+        up: this.viewer.camera.worldUp,
+        projection: "perspective",
+    }, () => {
+        //if (canStandOnTypes[metaObjectTypeF]) {
+        //  this.viewer.cameraControl.navMode = "firstPerson";
+        //  document.getElementById("navFirstPerson").checked = true;
+        //  document.getElementById("projPerspective").checked = true;
+        //  mode = "3d";
+        //} else {
+        this.viewer.cameraFlight.flyTo({
+            aabb: entAabbF,
+            fitFOV: 45
+        }, () => {
+            this.viewer.cameraControl.navMode = "firstPerson";
+            //document.getElementById("navFirstPerson").checked = true;
+            //document.getElementById("projPerspective").checked = true;
+            this.mode = "3d";
+        });
+        //}
+    });
+},
+
+
+
+
+ GUI_navmodeTARGETLOCK() {
+    // var SVGelement:HTMLElement = document.getElementById('navBIRDSEYEdiv')?.children[0] as HTMLElement;
+    
+    // TODO
+    
+    // if (this.model.nav.targetLock) {
+    //     this.model.nav.targetLock = false;
+    //     document.getElementById("navmodeTARGETLOCK").style.backgroundColor = '';
+    //     SVGelement.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlockoff.png');
+    // } else {
+    //     this.model.nav.targetLock = true;
+    //     document.getElementById("navmodeTARGETLOCK").style.backgroundColor = '#88F';
+    //     SVGelement.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlock.png');
+    // }
+
+},
+
+
+
+ GUI_actionGOTOroom() {
+    // NADA
+},
+ GUI_actionPARTSroom() {
+    
+    // TODO
+    // var roomtoload = document.getElementById('navROOMLST').options[document.getElementById('navROOMLST').selectedIndex].text;
+    // roomtoload = roomtoload.substring(roomtoload.indexOf('-') + 1);
+    // if (this.model.nav.loadedRooms.indexOf(',' + roomtoload + ',') > -1) {
+    //     alert('Room ' + roomtoload + ' is already loaded.');
+    // } else {
+
+
+    //     this.model.nav.loadedRooms += roomtoload + ',';
+    //     var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0];
+    //     for (var child = SVGelement.firstChild; child !== null; child = child.nextSibling) {
+    //         if (this.model.nav.loadedRooms.indexOf(',' + child.id + ',') > -1) {
+    //             child.setAttribute('fill', '#1fa0f0');
+    //         }
+    //     }
+
+    //     this.modelrooms.push('');
+    //     //    alert('Load room REQ-101-' + document.getElementById('navROOMLST').value + '.xkt');
+    //     var nextroomindex = this.modelrooms.length - 1;
+    //     this.modelrooms[nextroomindex] = this.xktLoader.load({
+    //         id: "Room" + nextroomindex,
+    //         src: "http://localhost:57914/api/v1/asset/xkt/REQ-101-" + document.getElementById('navROOMLST').value + ".xkt",
+    //         //src: "./XKTFiles/REQ-101-" + document.getElementById('navROOMLST').value + ".xkt",
+    //         edges: true,
+    //         saoEnabled: true,
+    //         pbrEnabled: false,
+    //         backfaces: true,
+    //         includeTypes: ["furniturePart", "IfcFace", "IfcWallStandardCase", "IfcBuildingElementProxy", "IfcFlowController", "IfcBuildingElementProxyType", "IfcFlowTerminal", "IfcPlate", "IfcMemberType", "IfcRelFillsElement", "IfcDoor", "IfcCovering", "IfcCoveringType", "IfcPlateType", "IfcSpace", "IfcSpaceType", "IfcSlab", "IfcSlabType", "IfcWindow", "IfcRelContainedInSpatialStructure", "IfcFurnishingElement", "IfcDoorLiningProperties", "IfcDoorPanelProperties", "IfcDoorStyle", "IfcConnectedFaceSet", "IfcCurtainWall", "IfcRailing", "IfcRoof", "IfcWindowLiningProperties", "IfcWindowStyle", "IfcWallType", "IfcWall", "IfcDistributionElementType", "IfcStairFlight", "IfcStairFlightType", "IfcStair", "IfcRailingType", "IfcColumn", "IfcCurtainWallType", "IfcBuildingStorey", "IfcColumnType", "IfcBuilding", "IfcSite"]
+    //         //includeTypes:["IfcPolyLoop","IfcFace","IfcFaceOuterBound","IfcCartesianPoint","IfcAxis2Placement3D","IfcShapeRepresentation","IfcLocalPlacement","IfcDirection","IfcProductDefinitionShape","IfcPolyline","IfcExtrudedAreaSolid","IfcMappedItem","IfcAxis2Placement2D","IfcBuildingElementProxy","IfcCompositeCurveSegment","IfcRectangleProfileDef","IfcFacetedBrep","IfcClosedShell","IfcWallStandardCase","IfcArbitraryClosedProfileDef","IfcFaceBound","IfcTrimmedCurve","IfcCircle","IfcRepresentationMap","IfcArbitraryProfileDefWithVoids","IfcFlowTerminal","IfcCompositeCurve","IfcCovering","IfcSpace","IfcDoor","IfcWindow","IfcFurnishingElement","IfcRelContainedInSpatialStructure","IfcBooleanClippingResult","IfcPlane","IfcCircleProfileDef","IfcSlab","IfcRoof","IfcHalfSpaceSolid","IfcCurtainWall","IfcConnectedFaceSet","IfcFlowController","IfcRailing","IfcWall","IfcCircleHollowProfileDef","IfcPolygonalBoundedHalfSpace","IfcStair","IfcOrganization","IfcGeometricRepresentationSubContext","IfcFaceBasedSurfaceModel","IfcBuildingStorey","IfcOwnerHistory","IfcPersonAndOrganization","IfcPerson","IfcApplication","IfcGeometricRepresentationContext","IfcCartesianTransformationOperator3D"]
+    //     });
+
+    //     this.modelrooms[nextroomindex].on("loaded", () => {
+    //         var t1 = performance.now();
+    //         document.getElementById("stats2").innerHTML = "Room " + document.getElementById('navROOMLST').value + " load " + Math.floor(t1 - this.t0) / 1000.0 + " secs<br>Objects: " + this.modelrooms[nextroomindex].numEntities;
+    //     });
+
+    // }
+},
+
+
+ GUI_BIRDSEYEmag(e) {
+    //alert(e.target.id);
+    var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0] as SVGSVGElement;
+    if (e.target.id == 'navBIRDSEYEmagFit') {
+        this.model.birdsEye.boxscale = 1.0;
+        SVGelement.style.width = '100%';
+        SVGelement.style.height = '100%';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx2') {
+        this.model.birdsEye.boxscale = 2.0;
+        SVGelement.style.width = '200%';
+        SVGelement.style.height = '200%';
+        SVGelement.style.marginTop = '-100px';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx4') {
+        this.model.birdsEye.boxscale = 4.0;
+        SVGelement.style.width = '400%';
+        SVGelement.style.height = '400%';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx8') {
+        this.model.birdsEye.boxscale = 8.0;
+        SVGelement.style.width = '800%';
+        SVGelement.style.height = '800%';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx16') {
+        this.model.birdsEye.boxscale = 16.0;
+        SVGelement.style.width = '1600%';
+        SVGelement.style.height = '1600%';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx32') {
+        this.model.birdsEye.boxscale = 32.0;
+        SVGelement.style.width = '3200%';
+        SVGelement.style.height = '3200%';
+    }
+    if (e.target.id == 'navBIRDSEYEmagx64') {
+        this.model.birdsEye.boxscale = 64.0;
+        SVGelement.style.width = '6400%';
+        SVGelement.style.height = '6400%';
+    }
+    // The cursor point, translated into screen coordinates - 
+    var SVGbound = SVGelement.getBoundingClientRect();
+    var pt = SVGelement.createSVGPoint();
+    //var viewbox = SVGelement.getAttribute('viewBox').split(" ");
+    //var viewboxminy = viewbox[1];
+    //var viewboxhgt = viewbox[3];
+    //var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+    
+    pt.x = Number(document.getElementById("SVGPOSCAM")?.getAttribute("cx")) * 1;
+    pt.y = Number(document.getElementById("SVGPOSCAM")?.getAttribute("cy")) * 1;
+       
+       
+       // TODO
+    // var cursorpt = pt.matrixTransform(SVGelement.getScreenCTM());
+    // var CAMpxposY = cursorpt.y - SVGbound.top;
+    // var CAMpxposX = cursorpt.x - SVGbound.left;
+    // //alert('CAMpxposY=' + CAMpxposY + ' SVGbound.height=' + SVGbound.height);
+    // SVGelement.style.marginTop = ((((SVGbound.height / this.model.birdsEye.boxscale) * 0.5) - CAMpxposY)) + 'px';
+    // SVGelement.style.marginLeft = ((((SVGbound.width / this.model.birdsEye.boxscale) * 0.5) - CAMpxposX)) + 'px';
+
+    this.GUI_setSVGassetpos();
+},
+
+
+
+ GUI_navmodePARTS(e) {
+    var partIndex = e.target.id.substring(8, 99) * 1;
+    if (e.target.checked) {
+        //alert('turn on' + e.target.value + ' ID:' + partIndex);
+
+        //alert('turn on' + e.target.value);
+        //var p0 = performance.now();
+        //document.getElementById("stats2").innerHTML = "Loading this.model 2...";
+        this.modelparts[partIndex] = this.xktLoader.load({
+            //this.model2 = xktLoader.load({
+            id: "myModel2",
+            //src: "./XKTFiles/" + e.target.value + ".xkt",
+            src: "http://localhost:57914/api/v1/asset/xkt/" + e.target.value + ".xkt",
+            edges: true,
+            saoEnabled: true,
+            pbrEnabled: false,
+            backfaces: true,
+            includeTypes: ["furniturePart", "IfcFace", "IfcWallStandardCase", "IfcBuildingElementProxy", "IfcFlowController", "IfcBuildingElementProxyType", "IfcFlowTerminal", "IfcPlate", "IfcMemberType", "IfcRelFillsElement", "IfcDoor", "IfcCovering", "IfcCoveringType", "IfcPlateType", "IfcSpace", "IfcSpaceType", "IfcSlab", "IfcSlabType", "IfcWindow", "IfcRelContainedInSpatialStructure", "IfcFurnishingElement", "IfcDoorLiningProperties", "IfcDoorPanelProperties", "IfcDoorStyle", "IfcConnectedFaceSet", "IfcCurtainWall", "IfcRailing", "IfcRoof", "IfcWindowLiningProperties", "IfcWindowStyle", "IfcWallType", "IfcWall", "IfcDistributionElementType", "IfcStairFlight", "IfcStairFlightType", "IfcStair", "IfcRailingType", "IfcColumn", "IfcCurtainWallType", "IfcBuildingStorey", "IfcColumnType", "IfcBuilding", "IfcSite"]
+            //includeTypes: ["IfcFace", "IfcDistributionPort", "IfcRelConnectsPortToElement", "IfcRelConnectsPorts", "IfcClosedShell", "IfcCovering", "IfcFlowSegment", "IfcFlowFitting", "IfcRelCoversBldgElements", "IfcRelAssociatesMaterial", "IfcBuildingElementProxy", "IfcFlowTerminal", "IfcFaceBound", "IfcSystem", "IfcRelServicesBuildings", "IfcConnectedFaceSet", "IfcBuildingElementProxyType", "IfcSlab", "IfcSlabType", "IfcSpace", "IfcSpaceType", "IfcRelContainedInSpatialStructure", "IfcBuildingStorey", "IfcBuilding", "IfcSite", "IfcZone"]
+        });
+    } else {
+        //alert('turn off' + e.target.value);
+        this.modelparts[partIndex].destroy();
+    }
+},
+
+ GUI_setSVGcampos(e) {
+    var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0] as SVGSVGElement;//document.getElementById('navBIRDSEYE').getSVGDocument()?.children[0];
+    var pt = SVGelement.createSVGPoint();
+    var viewbox = SVGelement.getAttribute('viewBox')?.split(" ");
+    if( viewbox ) {
+      var viewboxminy = Number(viewbox[1] ?? 0);
+      var viewboxhgt = Number(viewbox[3] ?? 0);
+      var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+    
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    //debugger;
+    
+    
+    // TODO
+    // if (e.srcElement) {
+    //     var roomID = e.srcElement.id;
+    //     //document.getElementById('navROOMLST').value = roomID;
+    //     var dd = document.getElementById('navROOMLST');
+    //     for (var i = 0; i < dd.options.length; i++) {
+    //         if (dd.options[i].text.indexOf('-' + roomID) > -1) {
+    //             dd.selectedIndex = i;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    // The cursor point, translated into svg coordinates - 
+
+    // TODO
+    // var cursorpt = pt.matrixTransform(SVGelement.getScreenCTM().inverse());
+    // var IFC_x_cm = cursorpt.x * 0.1;
+    // var IFC_y_cm = (SVGtruminy - cursorpt.y) * 0.1;
+
+    // this.GUI_navSetCameraXY(IFC_x_cm, IFC_y_cm);
+    // if (e.srcElement.getAttribute("fill") == '#ebba1c' && e.shiftKey == false) {
+    //     this.GUI_actionPARTSroom();
+    // }
+    }
+
+
+},
+
+
+
+
+ GUI_refreshSVGcampos() {
+    var svg_doc = document.getElementById('navBIRDSEYEdiv')?.children[0];
+    if( !svg_doc )
+      return;
+    try {
+      // TODO
+        // var viewbox = svg_doc.getAttribute('viewBox')?.split(" ");
+        // var viewboxminy = Number(viewbox[1]);
+        // var viewboxhgt = Number(viewbox[3]);
+        // var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+
+        // var SVGx = (this.viewer.scene.camera.eye[0] * 10);
+        // var SVGy = SVGtruminy - ((this.viewer.scene.camera.eye[1] * 10));
+
+        // document.getElementById("SVGPOSCAM").setAttribute("cx", ""+ SVGx);
+        // document.getElementById("SVGPOSCAM").setAttribute("cy", ""+ SVGy);
+        // document.getElementById("SVGPOSCAM").setAttribute("r", ""+ 2000 / this.model.birdsEye.boxscale);
+
+        // document.getElementById("SVGDIRCAM").setAttribute("x1", ""+SVGx);
+        // document.getElementById("SVGDIRCAM").setAttribute("y1", ""+SVGy);
+        // SVGx = (this.viewer.scene.camera.look[0] * 10);
+        // SVGy = SVGtruminy - ((this.viewer.scene.camera.look[1] * 10));
+        // document.getElementById("SVGDIRCAM").setAttribute("x2", ""+ SVGx);
+        // document.getElementById("SVGDIRCAM").setAttribute("y2", ""+SVGy);
+
+
+
+        //alert(this.viewer.scene.camera.eye[0]);
+        //alert(SVGdoc.getElementById("SVGCAMPOS").)
+    } catch (err) {
+        // NADA
+    }
+    document.getElementById('DEBUGINFO')!.innerHTML = 'Obj Count=' + this.viewer.scene.numObjects +
+        ' campos ' + Math.round(this.viewer.scene.camera.eye[0]) + ',' +
+        Math.round(this.viewer.scene.camera.eye[1]) + ',' +
+        Math.round(this.viewer.scene.camera.eye[2]) + 'camlook ' +
+        Math.round(this.viewer.scene.camera.look[0]) + ',' +
+        Math.round(this.viewer.scene.camera.look[1]) + ',' +
+        Math.round(this.viewer.scene.camera.look[2]) + 'camUP ' +
+        Math.round(this.viewer.scene.camera.up[0]) + ',' +
+        Math.round(this.viewer.scene.camera.up[1]) + ',' +
+        Math.round(this.viewer.scene.camera.up[2]);
+
+    //Set elevation icon
+    svg_doc = document.getElementById('navELEVATIONgraphic')!;
+    document.getElementById("SVGPOSCAMelev")?.setAttribute("cy", "" + (300 - ((this.viewer.scene.camera.eye[2] * 10) * this.model.elevationScale)));
+
+
+},
+
+
+
+ GUI_setSVGassetpos() {
+    var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0];
+    try {
+        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cx", this.model.startpos.x);
+        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cy", this.model.startpos.y);
+
+
+        ///TODO
+        // var viewbox = SVGelement.getAttribute('viewBox').split(" ");
+        // var viewboxminy = Number(viewbox[1]);
+        // var viewboxhgt = Number(viewbox[3]);
+        // var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+        // var targetsize = 6000;
+        // document.getElementById("SVGPOSASSET").setAttribute("x", "" + (this.model.cen.x - ((targetsize / this.model.birdsEye.boxscale) * 0.5)));
+        // document.getElementById("SVGPOSASSET").setAttribute("y", "" + (SVGtruminy - (this.model.cen.y + ((targetsize / this.model.birdsEye.boxscale) * 0.5))));
+        // if (this.model.nav.targetLock) {
+        //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlock.png');
+        // } else {
+        //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlockoff.png');
+        // }
+        // document.getElementById("SVGPOSASSET").setAttribute("width", "" + targetsize / this.model.birdsEye.boxscale);
+        // document.getElementById("SVGPOSASSET").setAttribute("height", "" + targetsize / this.model.birdsEye.boxscale);
+
+        this.GUI_refreshSVGcampos();
+    } catch (err) {
+        // NADA
+    }
+},
+
+
+ GUI_navmodeORBITmovein() {
+    var eyeoffset_x = this.viewer.scene.camera.look[0] - this.viewer.scene.camera.eye[0];
+    var eyeoffset_y = this.viewer.scene.camera.look[1] - this.viewer.scene.camera.eye[1];
+    var eyeoffset_z = this.viewer.scene.camera.look[2] - this.viewer.scene.camera.eye[2];
+
+
+    this.viewer.scene.camera.eye = [this.viewer.scene.camera.eye[0] + (eyeoffset_x * 0.5), this.viewer.scene.camera.eye[1] + (eyeoffset_y * 0.5), this.viewer.scene.camera.eye[2]]
+
+
+    //this.viewer.scene.camera.look = [this.model.cen.x * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+    //this.viewer.scene.camera.eye = [(this.model.min.x - 6000) * this.model.scaleres, (this.model.min.y - 6000) * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+
+
+},
+ GUI_navmodeORBITmoveout() {
+    var eyeoffset_x = this.viewer.scene.camera.look[0] - this.viewer.scene.camera.eye[0];
+    var eyeoffset_y = this.viewer.scene.camera.look[1] - this.viewer.scene.camera.eye[1];
+    var eyeoffset_z = this.viewer.scene.camera.look[2] - this.viewer.scene.camera.eye[2];
+
+
+    this.viewer.scene.camera.eye = [this.viewer.scene.camera.eye[0] - (eyeoffset_x * 1), this.viewer.scene.camera.eye[1] - (eyeoffset_y * 1), this.viewer.scene.camera.eye[2]]
+
+
+    //this.viewer.scene.camera.look = [this.model.cen.x * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+    //this.viewer.scene.camera.eye = [(this.model.min.x - 6000) * this.model.scaleres, (this.model.min.y - 6000) * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+
+
+},
+
+ GUI_navmodeORBITrotcw() {
+    this.viewer.scene.camera.orbitYaw(-20.0);
+},
+ GUI_navmodeORBITrotccw() {
+    this.viewer.scene.camera.orbitYaw(20.0);
+},
+
+
+ GUI_onclickSELECT() {
+    // document.getElementById("onclickSELECT").style.backgroundColor = '#007';
+    // document.getElementById("onclickMEASURE").style.backgroundColor = '';
+    // document.getElementById("onclickGOTO").style.backgroundColor = '';
+    this.isFP = false;
+    this.selectMode = "select";
+    //sectionPlanes.clear();
+    this.distanceMeasurements.clear();
+    this.distanceMeasurements.control.deactivate();
+},
+
+ GUI_onclickMEASURE() {
+    // document.getElementById("onclickSELECT").style.backgroundColor = '';
+    // document.getElementById("onclickMEASURE").style.backgroundColor = '#007';
+    // document.getElementById("onclickGOTO").style.backgroundColor = '';
+    this.isFP = true;
+    this.selectMode = "measure"
+    //sectionPlanes.clear();
+    this.distanceMeasurements.control.activate();
+},
+
+GUI_onclickGOTO() {
+    // document.getElementById("onclickSELECT").style.backgroundColor = '';
+    // document.getElementById("onclickMEASURE").style.backgroundColor = '';
+    // document.getElementById("onclickGOTO").style.backgroundColor = '#007';
+    this.isFP = true;
+    this.selectMode = "goto";
+    //sectionPlanes.clear();
+    this.distanceMeasurements.clear();
+    this.distanceMeasurements.control.deactivate();
+},
+
+GUI_onclickSLICE() {
+    //document.getElementById("rdoSelectItem").onclick = (e) => {
+    // document.getElementById("onclickSELECT").style.backgroundColor = '';
+    // document.getElementById("onclickMEASURE").style.backgroundColor = '';
+    // document.getElementById("onclickGOTO").style.backgroundColor = '';
+    this.isFP = true;
+    this.selectMode = "slice"
+    this.distanceMeasurements.clear();
+    this.distanceMeasurements.control.deactivate();
+},
+
+
+
+GUI_actionPARTS() {
+    // if (document.getElementById("navPARTSpanel").style.display == 'none') {
+    //     document.getElementById("navPARTSpanel").style.display = '';
+    // } else {
+    //     document.getElementById("navPARTSpanel").style.display = 'none';
+    // }
+},
+
+
+GUI_actionPLAN() {
+    // if (document.getElementById("navBIRDSEYEpanel").style.display == 'none') {
+    //     document.getElementById("navBIRDSEYEpanel").style.display = '';
+    // } else {
+    //     document.getElementById("navBIRDSEYEpanel").style.display = 'none';
+    // }
+},
+
+GUI_actionELEV() {
+    // if (document.getElementById("navELEVATIONpanel").style.display == 'none') {
+    //     document.getElementById("navELEVATIONpanel").style.display = '';
+    // } else {
+    //     document.getElementById("navELEVATIONpanel").style.display = 'none';
+    // }
+},
+
+
+GUI_actionDETAILS() {
+
+  // TODO
+
+    // console.log("GUI_actionDETAILS");
+
+    // if (document.getElementById("INFOFRAME").style.display == 'none') {
+    //     document.getElementById("INFOFRAME").style.display = '';
+    //     document.getElementById("INFOFRAME").src = "ADBDETAILS.ASPX?OBJID=" + document.getElementById("itemId").value;
+    // } else {
+    //     document.getElementById("INFOFRAME").style.display = 'none';
+    // }
+},
+
+GUI_actionGOTO() {
+
+    console.log("GUI_actionGOTO");
+
+    //document.getElementById("showItem").onclick = (e) => {
+    var targetID = (document.getElementById("itemId") as HTMLInputElement).value;
+    if (targetID.indexOf('_M') > targetID.length - 6) {
+        targetID = targetID.substring(0, targetID.indexOf('_M'));
+
+    }
+    const entity = this.viewer.scene.objects[targetID];
+    if (entity) {
+        this.ADBGoToItem3d(entity.aabb);
+    }
+
+    //if (mode == "2d") {
+    //  storeyViewsPlugin.showStoreyObjects(currentSId, {
+    //    hideOthers: true,
+    //    useObjectStates: false
+    //  });
+    //}
+
+    //if (mode == "2d") {
+    //  storeyViewsPlugin.showStoreyObjects(currentSId, {
+    //    hideOthers: true,
+    //    useObjectStates: false
+    //  });
+    //  storeyViewsPlugin.gotoStoreyCamera(currentSId, {
+    //    projection: "ortho",
+    //    done: () => {
+    //      this.viewer.cameraControl.navMode = "planView"; // Disable rotation
+    //      document.getElementById("navPlanView").checked = true;
+    //      document.getElementById("projOrtho").checked = true;
+    //      this.viewer.cameraFlight.flyTo({
+    //        aabb: ent.aabb,
+    //        fitFOV: 50
+    //      }, () => {
+    //      });
+    //    }
+    //  });
+    //} else if (mode == "3dOf2d") {
+    //  storeyViewsPlugin.gotoStoreyCamera(currentSId, {
+    //    projection: "perspective",
+    //    done: () => {
+    //      document.getElementById("projPerspective").checked = true;
+    //      GoToItem3d(metaObjectType, ent.aabb);
+    //    }
+    //  });
+    //} else {
+    //  GoToItem3d(metaObjectType, ent.aabb);
+    //}
+
+
+},
+
+
+GUI_movesectionplaneCD() {//Lower ceiling section plane 1m.
+    const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Ceiling"];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model.scaleres)];
+    //mySectionPlane2.dir = [0.4, 0.0, 0.5];
+},
+GUI_movesectionplaneCU() {//Raise ceiling section plane 1m.
+    const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Ceiling"];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model.scaleres)];
+    //mySectionPlane2.dir = [0.4, 0.0, 0.5];
+},
+GUI_movesectionplaneFD() {//Lower floor section plane 1m.
+    const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Floor"];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model.scaleres)];
+    //mySectionPlane2.dir = [0.4, 0.0, 0.5];
+},
+GUI_movesectionplaneFU() {//Raise floor section plane 1m.
+    const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Floor"];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model.scaleres)];
+    //mySectionPlane2.dir = [0.4, 0.0, 0.5];
+},
+
+
+
+
   },
 });
 </script>
