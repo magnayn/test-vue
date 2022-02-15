@@ -1,4 +1,5 @@
 <template>
+<div>
   <!-- <button @click="buttonClick">Click</button>  -->
 
   <!-- add the viewer in here for the time being -->
@@ -349,7 +350,7 @@
     </svg>
   </div>
 
-  <iframe
+  <!-- <iframe
     id="INFOFRAME"
     style="
       display: none;
@@ -361,7 +362,8 @@
       height: 300px;
     "
     src="blank.aspx"
-  />
+  /> -->
+</div>
 </template>
 
 
@@ -430,6 +432,16 @@ div.tbicon {
   background-position: center;
   background-color: #cccccc;
 }
+
+#myNavCubeCanvas {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    bottom: 50px;
+    right: 0px;
+    z-index: 200000;
+}
+
 </style>
 
 
@@ -789,13 +801,22 @@ class VData {
 export default defineComponent({
   props: {
     xktId: String,
+    navMode: String
   },
   data() {
     return new VData();
   },
-
+  beforeUpdate() {
+    console.log("BeforeUpdate");
+    console.log(this.navMode);
+  },
+  updated() {
+    console.log("Updated");
+    console.log(this.navMode);
+  },
   async mounted() {
     console.log("Mounted");
+    console.log(this.navMode);
 
     this.viewer = new Viewer({
       canvasId: "myCanvas",
@@ -819,26 +840,10 @@ export default defineComponent({
 
     this.setupCamera();
 
-    if (this.model.nav.mode == "FPV") {
-      this.GUI_navmodeFPV(
-        this.model.startpos.x * this.model.scaleres,
-        this.model.startpos.y * this.model.scaleres
-      );
+    if( this.navMode != undefined )
+    {
+      this.setNavMode( this.navMode );
     }
-    if (this.model.nav.mode == "DRONE") {
-      this.GUI_navmodeDRONE(
-        this.model.cen.x * this.model.scaleres,
-        this.model.cen.y * this.model.scaleres
-      );
-    }
-    if (this.model.nav.mode == "ORBIT") {
-      this.GUI_navmodeORBIT(
-        this.model.startpos.x * this.model.scaleres,
-        this.model.startpos.y * this.model.scaleres
-      );
-    }
-
-
 
     //cameraControl.navMode = "firstPerson";
 
@@ -903,16 +908,50 @@ export default defineComponent({
     if (this.model.nav.mode == "DRONE") {
       this.GUI_togglecutplane(); //Turn on floor cutplanes.
     }
-    if (this.model.mlayout == "COMPACT") {
-      //document.getElementById('flrcpPANEL').style.display = 'none';
-      document.getElementById("actionDETAILS")!.style.display = "none";
-      document.getElementById("actionGOTO")!.style.display = "none";
-      document.getElementById("navmodeELEV")!.style.display = "none";
-      document.getElementById("itemId")!.style.display = "none";
-      document.getElementById("myNavCubeCanvas")!.style.display = "none";
-    }
+    // if (this.model.mlayout == "COMPACT") {
+    //   //document.getElementById('flrcpPANEL').style.display = 'none';
+    //   document.getElementById("actionDETAILS")!.style.display = "none";
+    //   document.getElementById("actionGOTO")!.style.display = "none";
+    //   document.getElementById("navmodeELEV")!.style.display = "none";
+    //   document.getElementById("itemId")!.style.display = "none";
+    //   document.getElementById("myNavCubeCanvas")!.style.display = "none";
+    // }
   },
   methods: {
+
+setNavMode(navMode:String) {
+
+  console.log("Set Nav Mode " + navMode);
+
+    if( navMode == "FPV" ) {
+      this.model.nav.mode = "FPV";
+      this.model.nav.observerHeight = this.model.nav.standardHeight.person;
+      
+      this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
+          this.model.startpos.y * this.model.scaleres);
+    }
+
+    if( navMode == "Drone" ) {
+           this.model.nav.mode = "DRONE";
+          this.model.nav.observerHeight = this.model.nav.standardHeight.drone;
+      this.GUI_navSetCameraXY(this.model.cen.x * this.model.scaleres,
+          this.model.cen.y * this.model.scaleres);
+    }
+
+    if( navMode == "Orbit" ) {
+       this.model.nav.mode = "ORBIT";
+        this.model.nav.observerHeight = this.model.nav.standardHeight.drone;
+      this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
+          this.model.startpos.y * this.model.scaleres);
+    }
+},
+setObserverHeight(height: number) {
+
+    this.model.nav.observerHeight = height;
+    
+    this.GUI_navSetCameraXY(null, null);
+
+},
 
     LoadXKT() {
      var isHighlight = false;
@@ -1672,11 +1711,7 @@ export default defineComponent({
   GUI_navmodeORBIT(IFC_x_cm, IFC_Y_cm) {
     this.model.nav.mode = "ORBIT";
     this.viewer.cameraControl.navMode = "orbit";
-    document.getElementById("navmodeFPV")!.style.backgroundColor = "";
-    document.getElementById("navmodeDRONE")!.style.backgroundColor = "";
-    document.getElementById("navmodeORBIT")!.style.backgroundColor = "#88F";
-    document.getElementById("navmodeORBITsub")!.style.display = "";
-    document.getElementById("navmodeFPVsub")!.style.display = "none";
+
 
     if (this.GUISETTING_cutplanes) {
       this.GUI_togglecutplane(); //Turn OFF floor cutplanes.

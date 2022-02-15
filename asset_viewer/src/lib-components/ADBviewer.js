@@ -16,7 +16,7 @@ export function go(_self) {
     
     document.getElementById("itemId").value = self.model.default_object;
     
-    SetupGUI();
+    //SetupGUI();
 
 
     //document.getElementById('navBIRDSEYE').onload = GUI_setSVGassetpos;
@@ -33,68 +33,7 @@ export function go(_self) {
 
 }
 
-function SetupGUI() {
-    
 
-    //Define control actions
-    document.getElementById("actionDETAILS").onclick = GUI_actionDETAILS;
-    document.getElementById("actionPARTS").onclick = GUI_actionPARTS;
-
-    document.getElementById("actionGOTO").onclick = GUI_actionGOTO;
-    document.getElementById("flrcpTOGGLE").onclick = self.GUI_togglecutplane;
-    document.getElementById("flrcpCD").onclick = GUI_movesectionplaneCD;
-    document.getElementById("flrcpCU").onclick = GUI_movesectionplaneCU;
-    document.getElementById("flrcpFD").onclick = GUI_movesectionplaneFD;
-    document.getElementById("flrcpFU").onclick = GUI_movesectionplaneFU;
-
-    document.getElementById("onclickSELECT").onclick = GUI_onclickSELECT;
-    document.getElementById("onclickMEASURE").onclick = GUI_onclickMEASURE;
-    document.getElementById("onclickGOTO").onclick = GUI_onclickGOTO;
-
-
-    document.getElementById("navmodeTARGETLOCK").onclick = GUI_navmodeTARGETLOCK;
-
-    document.getElementById("navmodeFPV").onclick = self.GUI_navmodeFPV;
-    document.getElementById("navmodeDRONE").onclick = self.GUI_navmodeDRONE;
-    document.getElementById("navmodeORBIT").onclick = self.GUI_navmodeORBIT;
-
-    document.getElementById("navmodePLAN").onclick = GUI_actionPLAN; //GUI_refreshSVGcampos;
-    document.getElementById("navmodeELEV").onclick = GUI_actionELEV; //GUI_refreshSVGcampos;
-
-    //document.getElementById("navFLRLST").onchange = GUI_navFLRLST;
-
-    //document.getElementById("navROOMLST").onchange = GUI_navROOMLOAD;
-
-
-    document.getElementById("navmodeORBITmoveout").onclick = GUI_navmodeORBITmoveout;
-    document.getElementById("navmodeORBITmovein").onclick = GUI_navmodeORBITmovein;
-    document.getElementById("navmodeORBITrotccw").onclick = GUI_navmodeORBITrotccw;
-    document.getElementById("navmodeORBITrotcw").onclick = GUI_navmodeORBITrotcw;
-
-    document.getElementById("navmodeFPVHGT00").onclick = GUI_navmodeFPVsethgt;
-    document.getElementById("navmodeFPVHGT01").onclick = GUI_navmodeFPVsethgt;
-    document.getElementById("navmodeFPVHGT02").onclick = GUI_navmodeFPVsethgt;
-    document.getElementById("navmodeFPVHGT03").onclick = GUI_navmodeFPVsethgt;
-
-
-
-    document.getElementById("actionGOTOroom").onclick = GUI_actionGOTOroom;
-    //document.getElementById("actionPARTSroom").onclick = GUI_actionPARTSroom; // GUI_navROOMLOAD;
-
-    document.getElementById("navBIRDSEYEmagFit").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx2").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx4").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx8").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx16").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx32").onclick = GUI_BIRDSEYEmag;
-    document.getElementById("navBIRDSEYEmagx64").onclick = GUI_BIRDSEYEmag;
-
-
-
-    //svg_doc.onclick = GUI_setSVGcampos;
-    document.getElementById('navBIRDSEYEdiv').onclick = GUI_setSVGcampos;
-    document.getElementById('navELEVATIONgraphic').onclick = self.GUI_navFLRLST;
-}
 
 function ADBGoToItem3d(entAabbF) {
 
@@ -600,34 +539,3 @@ function GUI_movesectionplaneFU() {//Raise floor section plane 1m.
 }
 
 
-
-
-
-
-
-function GUI_navmodeFPVsethgt(e) {
-    //alert(e.target.id);
-    document.getElementById("navmodeFPVHGT00").style.backgroundColor = '';
-    document.getElementById("navmodeFPVHGT01").style.backgroundColor = '';
-    document.getElementById("navmodeFPVHGT02").style.backgroundColor = '';
-    document.getElementById("navmodeFPVHGT03").style.backgroundColor = '';
-
-    if (e.target.id == 'navmodeFPVHGT00') { //Prone
-        self.model.nav.observerHeight = self.model.nav.standardHeight.person * 0.2;
-        document.getElementById("navmodeFPVHGT00").style.backgroundColor = '#88F';
-    }
-    if (e.target.id == 'navmodeFPVHGT01') { //Kneel
-        self.model.nav.observerHeight = self.model.nav.standardHeight.person * 0.5;
-        document.getElementById("navmodeFPVHGT01").style.backgroundColor = '#88F';
-    }
-    if (e.target.id == 'navmodeFPVHGT02') { //Stand
-        self.model.nav.observerHeight = self.model.nav.standardHeight.person;
-        document.getElementById("navmodeFPVHGT02").style.backgroundColor = '#88F';
-    }
-    if (e.target.id == 'navmodeFPVHGT03') { //Steps
-        self.model.nav.observerHeight = self.model.nav.standardHeight.person * 1.5;
-        document.getElementById("navmodeFPVHGT03").style.backgroundColor = '#88F';
-    }
-
-    self.GUI_navSetCameraXY();
-}

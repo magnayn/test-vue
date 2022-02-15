@@ -2,12 +2,13 @@
 import { defineComponent } from 'vue';
 // Uncomment import and local "components" registration if library is not registered globally.
 // import { WooyaySample } from '@/entry.esm';
-import { AssetViewer} from '@/entry.esm';
+import { AssetViewer, AssetViewToolbar} from '@/entry.esm';
 
 export default defineComponent({
   name: 'ServeDev',
    components: {
-    AssetViewer
+    AssetViewer,
+    AssetViewToolbar
    }
 });
 </script>
