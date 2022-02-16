@@ -1,8 +1,8 @@
 <template>
 <div>
   
-<asset-view-toolbar navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged"></asset-view-toolbar>
- <asset-view ref="assetView" v-bind:xktId="xktId" :navMode="currentNavMode"></asset-view>  
+<asset-view-toolbar navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged" :model="model"></asset-view-toolbar>
+ <asset-view ref="assetView" v-bind:model="model" :navMode="currentNavMode"></asset-view>  
 
 </div>
 </template>
@@ -14,10 +14,12 @@
 import AssetView from './AssetView.vue';
 import { defineComponent, ref } from 'vue'
 import AssetViewToolbar from './AssetViewToolbar.vue';
+import AssetDBClient from './AssetDBConnector';
 
 export default defineComponent( {
     props: {
-        xktId: String
+        xktId: String,
+        client: AssetDBClient
     },
     components: {
         'asset-view-toolbar': AssetViewToolbar,
@@ -25,13 +27,22 @@ export default defineComponent( {
     },
     data() {
       return {
-        currentNavMode: "Orbit"
+        currentNavMode: "Orbit",
+        model: null
       };
     },
-    mounted() {
-        console.log("Mounted");
- //       setInterval(this.GUI_refreshSVGcampos, 1000);
+    async mounted() {
+        console.log("..Mounted");
+        console.log(this.xktId);
+        console.log(this.client);
 
+        this.model = await this.client?.fetchModel(this.xktId ?? "");
+        
+    },
+    updated() {
+         console.log("..Updated");
+        console.log(this.xktId);
+        console.log(this.client);
     },
     methods: {
         modeChanged(newMode) {

@@ -12,6 +12,7 @@ import {
     math,
     XKTLoaderPlugin,
   } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+import AssetDBClient from "./AssetDBConnector";
 
 export default class ModelLoader {
 
@@ -26,6 +27,11 @@ export default class ModelLoader {
   
     model: any;
   
+    get assetDBClient():AssetDBClient {
+        return this.model.assetDBClient;
+    }
+
+
     load(callback) {
       var modelinitialIndex = 0;
       var max: number = this.model.partsCount;
@@ -42,8 +48,7 @@ export default class ModelLoader {
           modelinitialIndex = i - 1;
           this.modelparts[modelinitialIndex] = this.xktLoader.load({
             id: "myModel" + i,
-            //src: "./XKTFiles/REQ-" + this.model.xktreq + ".xkt",
-            src: "http://localhost:57914/api/v1/asset/xkt/REQ-" + this.model.xktreq + ".xkt",
+            src: this.assetDBClient.getXKTUrlFor(this.model.xktreq),
             edges: true,
             saoEnabled: true,
             pbrEnabled: false,
@@ -110,7 +115,7 @@ export default class ModelLoader {
               //this.model2 = xktLoader.load({
               id: "myModel2",
               //src: "./XKTFiles/" + e.target.value + ".xkt",
-              src: "http://localhost:57914/api/v1/asset/xkt/" + name + ".xkt",
+              src: this.assetDBClient.getXKTUrlFor(name),
               edges: true,
               saoEnabled: true,
               pbrEnabled: false,
@@ -130,7 +135,7 @@ export default class ModelLoader {
            var nextroomindex = this.modelrooms.length - 1;
            this.modelrooms[nextroomindex] = this.xktLoader.load({
                id: "Room" + nextroomindex,
-               src: "http://localhost:57914/api/v1/asset/xkt/REQ-101-" + name + ".xkt",
+               src: this.assetDBClient.getXKTUrlFor(name),
                //src: "./XKTFiles/REQ-101-" + document.getElementById('navROOMLST').value + ".xkt",
                edges: true,
                saoEnabled: true,

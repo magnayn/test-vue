@@ -466,6 +466,7 @@ import {
 } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 
 import ModelLoader  from './ModelLoader';
+import AssetDBClient from "./AssetDBConnector";
 
 //function AJstatechgVIEWER(){ if(xhr.readyState==4){  if(xhr.status==200){viewer_ajaxresults(xhr.responseText);  } }}
 
@@ -493,7 +494,7 @@ const canStandOnTypes = {
 class VData {
   viewer: any;
   sectionPlanes: any;
-  model: any;
+
 
   GUISETTING_cutplanes = false;
 
@@ -526,7 +527,7 @@ class VData {
 
 export default defineComponent({
   props: {
-    xktId: String,
+    model: null,
     navMode: String
   },
   data() {
@@ -534,15 +535,22 @@ export default defineComponent({
   },
   beforeUpdate() {
     console.log("BeforeUpdate");
+        console.log(this.model);
     console.log(this.navMode);
   },
   updated() {
     console.log("Updated");
+        console.log(this.model);
     console.log(this.navMode);
+
+    
+    this.LoadXKT();
+
   },
   async mounted() {
     console.log("Mounted");
     console.log(this.navMode);
+    console.log(this.model);
 
     this.viewer = new Viewer({
       canvasId: "myCanvas",
@@ -556,12 +564,8 @@ export default defineComponent({
       overviewVisible: true,
     });
 
-    const response = await fetch(
-      "http://localhost:57914/api/v1/asset/model/" + this.xktId
-    );
 
-    this.model = await response.json();
-    console.log("INITY");
+    console.log("INITY " + this.model?.xktId);
     console.log(this.nav);
     //this.nav = this.model.nav;
 
@@ -628,15 +632,10 @@ export default defineComponent({
     });
 
     // Load XKT..
+
     this.LoadXKT();
 
-    this.itemId = this.model.default_object;
-
-    
-
-    //document.getElementById('navBIRDSEYE').onload = GUI_setSVGassetpos;
-    this.GUI_setSVGassetpos();
-
+ 
 
 
     //Set actions for part checkboxes
@@ -646,13 +645,7 @@ export default defineComponent({
 
     this.createContextMenu();
 
-    //Set controls to defaults appropriate to the mode.
-    //if (model.nav.mode == 'FPV') {
-    //  GUI_togglecutplane(); //Turn on floor cutplanes.
-    //}
-    if (this.nav.mode == "DRONE") {
-      this.GUI_togglecutplane(); //Turn on floor cutplanes.
-    }
+    
     // if (this.model.mlayout == "COMPACT") {
     //   //document.getElementById('flrcpPANEL').style.display = 'none';
     //   document.getElementById("actionDETAILS")!.style.display = "none";
@@ -665,6 +658,8 @@ export default defineComponent({
   methods: {
 
 setNavMode(navMode:String) {
+  if( this.model == null )
+    return;
 
   console.log("Set Nav Mode " + navMode);
 
@@ -699,6 +694,27 @@ setObserverHeight(height: number) {
 },
 
     LoadXKT() {
+
+      if( this.model == null || this.loader != null ) {
+        // Exit if we have loaded before / already
+        return;
+      }
+
+         this.itemId = this.model.default_object;
+
+    
+
+    //document.getElementById('navBIRDSEYE').onload = GUI_setSVGassetpos;
+    this.GUI_setSVGassetpos();
+//Set controls to defaults appropriate to the mode.
+    //if (model.nav.mode == 'FPV') {
+    //  GUI_togglecutplane(); //Turn on floor cutplanes.
+    //}
+    if (this.nav.mode == "DRONE") {
+      this.GUI_togglecutplane(); //Turn on floor cutplanes.
+    }
+
+
      var isHighlight = false;
     var currentSId = 0;
     const damage = ["O10566834"];

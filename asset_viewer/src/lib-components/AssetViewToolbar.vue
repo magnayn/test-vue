@@ -121,13 +121,18 @@ export enum NavMode{
 
 export default defineComponent( {
     props: {
-        navMode: String
+        navMode: String,
+        model: null,
     },
     components: {
         DxToolbar,
         DxItem,
         DxButton,
         DxTooltip
+    },
+    updated() {
+      console.log("TB UPDATE");
+      console.log(this.model);
     },
     data() {
       return {
@@ -177,9 +182,9 @@ export default defineComponent( {
       actionGOTOroom:   { icon: "IMAGES/ICON_goto.png", hint:"Goto room", onClick: ()=> { }},
       listRooms: { 
         width: 140,
-        items: productTypes,
+        items: this.model?.floorList,
         valueExpr: 'id',
-        displayExpr: 'text',
+        displayExpr: 'name',
         value: null,
         onValueChanged: (args) => {
          
