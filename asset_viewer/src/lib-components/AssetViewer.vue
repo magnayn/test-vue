@@ -28,6 +28,11 @@ export default defineComponent( {
         currentNavMode: "Orbit"
       };
     },
+    mounted() {
+        console.log("Mounted");
+ //       setInterval(this.GUI_refreshSVGcampos, 1000);
+
+    },
     methods: {
         modeChanged(newMode) {
             console.log(newMode);
@@ -35,12 +40,75 @@ export default defineComponent( {
 
             const item:any = this.$refs.assetView;
             item?.setNavMode(newMode);
+
+
+            console.log("NAV: ");
+            console.log( item.nav);
+
         },
          heightChanged(height:number) {
             console.log("Set Height " + height);
             const item:any = this.$refs.assetView;
             item?.setObserverHeight(height);
-        }
+        },
+        cameraPositionChanged() {
+        
+console.log("CAMERA POSITION CHANGE");
+
+        const item:any = this.$refs.assetView;
+        if( item == null )
+            return;
+
+    var svg_doc = document.getElementById('navBIRDSEYEdiv')?.children[0];
+    if( !svg_doc )
+      return;
+    try {
+      // TODO
+        // var viewbox = svg_doc.getAttribute('viewBox')?.split(" ");
+        // var viewboxminy = Number(viewbox[1]);
+        // var viewboxhgt = Number(viewbox[3]);
+        // var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+
+        // var SVGx = (this.viewer.scene.camera.eye[0] * 10);
+        // var SVGy = SVGtruminy - ((this.viewer.scene.camera.eye[1] * 10));
+
+        // document.getElementById("SVGPOSCAM").setAttribute("cx", ""+ SVGx);
+        // document.getElementById("SVGPOSCAM").setAttribute("cy", ""+ SVGy);
+        // document.getElementById("SVGPOSCAM").setAttribute("r", ""+ 2000 / this.model.birdsEye.boxscale);
+
+        // document.getElementById("SVGDIRCAM").setAttribute("x1", ""+SVGx);
+        // document.getElementById("SVGDIRCAM").setAttribute("y1", ""+SVGy);
+        // SVGx = (this.viewer.scene.camera.look[0] * 10);
+        // SVGy = SVGtruminy - ((this.viewer.scene.camera.look[1] * 10));
+        // document.getElementById("SVGDIRCAM").setAttribute("x2", ""+ SVGx);
+        // document.getElementById("SVGDIRCAM").setAttribute("y2", ""+SVGy);
+
+
+
+        //alert(this.viewer.scene.camera.eye[0]);
+        //alert(SVGdoc.getElementById("SVGCAMPOS").)
+    } catch (err) {
+        // NADA
+    }
+    var viewer = item.viewer;
+
+    document.getElementById('DEBUGINFO')!.innerHTML = 'Obj Count=' + viewer.scene.numObjects +
+        ' campos ' + Math.round(viewer.scene.camera.eye[0]) + ',' +
+        Math.round(viewer.scene.camera.eye[1]) + ',' +
+        Math.round(viewer.scene.camera.eye[2]) + 'camlook ' +
+        Math.round(viewer.scene.camera.look[0]) + ',' +
+        Math.round(viewer.scene.camera.look[1]) + ',' +
+        Math.round(viewer.scene.camera.look[2]) + 'camUP ' +
+        Math.round(viewer.scene.camera.up[0]) + ',' +
+        Math.round(viewer.scene.camera.up[1]) + ',' +
+        Math.round(viewer.scene.camera.up[2]);
+
+    //Set elevation icon
+   // svg_doc = document.getElementById('navELEVATIONgraphic')!;
+   // document.getElementById("SVGPOSCAMelev")?.setAttribute("cy", "" + (300 - ((this.viewer.scene.camera.eye[2] * 10) * this.model.elevationScale)));
+
+
+}
     }
 
 });

@@ -465,7 +465,7 @@ import {
   XKTLoaderPlugin,
 } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 
-import { go } from "./ADBviewer";
+import ModelLoader  from './ModelLoader';
 
 //function AJstatechgVIEWER(){ if(xhr.readyState==4){  if(xhr.status==200){viewer_ajaxresults(xhr.responseText);  } }}
 
@@ -482,267 +482,6 @@ function viewer_ajaxresults(result){
 
 */
 
-const treeViewContextMenu = new ContextMenu({
-  items: [
-    [
-      {
-        title: "View Fit",
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          var objectIds: any[] = [];
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                objectIds.push(treeViewNode.objectId);
-              }
-            }
-          );
-          scene.setObjectsVisible(objectIds, true);
-          scene.setObjectsHighlighted(objectIds, true);
-          context.viewer.cameraFlight.flyTo(
-            {
-              projection: "perspective",
-              aabb: scene.getAABB(objectIds),
-              duration: 0.5,
-            },
-            () => {
-              setTimeout(function () {
-                scene.setObjectsHighlighted(scene.highlightedObjectIds, false);
-              }, 500);
-            }
-          );
-        },
-      },
-      {
-        title: "View Fit All",
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          context.viewer.cameraFlight.flyTo({
-            projection: "perspective",
-            aabb: scene.getAABB({}),
-            duration: 0.5,
-          });
-        },
-      },
-    ],
-    [
-      {
-        title: "Hide",
-        doAction: function (context) {
-          //context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode) => {
-          //  if (treeViewNode.objectId) {
-          //    const entity = context.viewer.scene.objects[treeViewNode.objectId];
-          //    if (entity) {
-          //      entity.visible = false;
-          //    }
-          //  }
-          //});
-        },
-      },
-      {
-        title: "Hide Others",
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          scene.setObjectsVisible(scene.visibleObjectIds, false);
-          scene.setObjectsXRayed(scene.xrayedObjectIds, false);
-          scene.setObjectsSelected(scene.selectedObjectIds, false);
-          scene.setObjectsHighlighted(scene.highlightedObjectIds, false);
-          //                    context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode) => {
-          //                        if (treeViewNode.objectId) {
-          //                            const entity = scene.objects[treeViewNode.objectId];
-          //                            if (entity) {
-          //entity.visible = true;
-          //                            }
-          //                        }
-          //                    });
-        },
-      },
-      {
-        title: "Hide All",
-        getEnabled: function (context) {
-          return context.viewer.scene.visibleObjectIds.length > 0;
-        },
-        doAction: function (context) {
-          context.viewer.scene.setObjectsVisible(
-            context.viewer.scene.visibleObjectIds,
-            false
-          );
-        },
-      },
-    ],
-    [
-      {
-        title: "Show",
-        doAction: function (context) {
-          //context.treeViewPlugin.withNodeTree(context.treeViewNode, (treeViewNode) => {
-          //  if (treeViewNode.objectId) {
-          //    const entity = context.viewer.scene.objects[treeViewNode.objectId];
-          //    if (entity) {
-          //      entity.visible = true;
-          //      entity.xrayed = false;
-          //      entity.selected = false;
-          //    }
-          //  }
-          //});
-        },
-      },
-      {
-        title: "Show Others",
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          scene.setObjectsVisible(scene.objectIds, true);
-          scene.setObjectsXRayed(scene.xrayedObjectIds, false);
-          scene.setObjectsSelected(scene.selectedObjectIds, false);
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity = scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.visible = false;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "Show All",
-        getEnabled: function (context) {
-          const scene = context.viewer.scene;
-          return scene.numVisibleObjects < scene.numObjects;
-        },
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          scene.setObjectsVisible(scene.objectIds, true);
-          scene.setObjectsXRayed(scene.xrayedObjectIds, false);
-          scene.setObjectsSelected(scene.selectedObjectIds, false);
-        },
-      },
-    ],
-    [
-      {
-        title: "X-Ray",
-        doAction: function (context) {
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity =
-                  context.viewer.scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.xrayed = true;
-                  entity.visible = true;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "Undo X-Ray",
-        doAction: function (context) {
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity =
-                  context.viewer.scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.xrayed = false;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "X-Ray Others",
-        doAction: function (context) {
-          const scene = context.viewer.scene;
-          scene.setObjectsVisible(scene.objectIds, true);
-          scene.setObjectsXRayed(scene.objectIds, true);
-          scene.setObjectsSelected(scene.selectedObjectIds, false);
-          scene.setObjectsHighlighted(scene.highlightedObjectIds, false);
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity = scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.xrayed = false;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "Reset X-Ray",
-        getEnabled: function (context) {
-          return context.viewer.scene.numXRayedObjects > 0;
-        },
-        doAction: function (context) {
-          context.viewer.scene.setObjectsXRayed(
-            context.viewer.scene.xrayedObjectIds,
-            false
-          );
-        },
-      },
-    ],
-    [
-      {
-        title: "Select",
-        doAction: function (context) {
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity =
-                  context.viewer.scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.selected = true;
-                  entity.visible = true;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "Deselect",
-        doAction: function (context) {
-          context.treeViewPlugin.withNodeTree(
-            context.treeViewNode,
-            (treeViewNode) => {
-              if (treeViewNode.objectId) {
-                const entity =
-                  context.viewer.scene.objects[treeViewNode.objectId];
-                if (entity) {
-                  entity.selected = false;
-                }
-              }
-            }
-          );
-        },
-      },
-      {
-        title: "Clear Selection",
-        getEnabled: function (context) {
-          return context.viewer.scene.numSelectedObjects > 0;
-        },
-        doAction: function (context) {
-          context.viewer.scene.setObjectsSelected(
-            context.viewer.scene.selectedObjectIds,
-            false
-          );
-        },
-      },
-    ],
-  ],
-});
-
 const canStandOnTypes = {
   // IFC types we can stand on in first-person mode
   IfcSlab: true,
@@ -750,30 +489,6 @@ const canStandOnTypes = {
   IfcFloor: true,
   IfcFooting: true,
 };
-
-/*
-viewer: any;
-  sectionPlanes: any;
-
-  model: any;
-
-  GUISETTING_cutplanes = false;
-
-  cameraControl: any;
-  distanceMeasurements: any;
-  mapColor: any = new Map();
-
-  // XKT data
-  modelparts: any[] = [];
-  modelrooms: any[] = [];
-
-  xktLoader: any;
-
-  selectMode = "select";
-  isFP = false;
-  worldPos = math.vec3();
-  mode = "2d";
-  */
 
 class VData {
   viewer: any;
@@ -787,15 +502,26 @@ class VData {
   mapColor: any = new Map();
 
   // XKT data
-  modelparts: any[] = [];
-  modelrooms: any[] = [];
-
-  xktLoader: any;
-
+  loader!:ModelLoader;
+  
   selectMode = "select";
   isFP = false;
   worldPos = math.vec3();
   mode = "2d";
+
+  nav = {
+        
+                    standardHeight: { drone: 3000, person: 150 },
+                    observerHeight: 160,
+                    mode: "ORBIT",
+                    targetLock: true,
+                    loadedRooms: ",,"
+                };
+  
+
+
+  // Selected Item ID
+  itemId:string = "";
 }
 
 export default defineComponent({
@@ -835,6 +561,12 @@ export default defineComponent({
     );
 
     this.model = await response.json();
+    console.log("INITY");
+    console.log(this.nav);
+    //this.nav = this.model.nav;
+
+    console.log("OUTY");
+    console.log(this.nav);
 
     console.log(this.model);
 
@@ -897,11 +629,10 @@ export default defineComponent({
 
     // Load XKT..
     this.LoadXKT();
-    
-    (document.getElementById("itemId") as HTMLInputElement).value = this.model.default_object;
-    
-    //SetupGUI();
 
+    this.itemId = this.model.default_object;
+
+    
 
     //document.getElementById('navBIRDSEYE').onload = GUI_setSVGassetpos;
     this.GUI_setSVGassetpos();
@@ -913,16 +644,13 @@ export default defineComponent({
     //     document.getElementById("navPARTS" + i)!.onclick = this.GUI_navmodePARTS;
     // }
 
-    setInterval(this.GUI_refreshSVGcampos, 1000);
-
-
     this.createContextMenu();
 
     //Set controls to defaults appropriate to the mode.
     //if (model.nav.mode == 'FPV') {
     //  GUI_togglecutplane(); //Turn on floor cutplanes.
     //}
-    if (this.model.nav.mode == "DRONE") {
+    if (this.nav.mode == "DRONE") {
       this.GUI_togglecutplane(); //Turn on floor cutplanes.
     }
     // if (this.model.mlayout == "COMPACT") {
@@ -941,30 +669,30 @@ setNavMode(navMode:String) {
   console.log("Set Nav Mode " + navMode);
 
     if( navMode == "FPV" ) {
-      this.model.nav.mode = "FPV";
-      this.model.nav.observerHeight = this.model.nav.standardHeight.person;
+      this.nav.mode = "FPV";
+      this.nav.observerHeight = this.nav.standardHeight.person;
       
       this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
           this.model.startpos.y * this.model.scaleres);
     }
 
     if( navMode == "Drone" ) {
-           this.model.nav.mode = "DRONE";
-          this.model.nav.observerHeight = this.model.nav.standardHeight.drone;
+           this.nav.mode = "DRONE";
+          this.nav.observerHeight = this.nav.standardHeight.drone;
       this.GUI_navSetCameraXY(this.model.cen.x * this.model.scaleres,
           this.model.cen.y * this.model.scaleres);
     }
 
     if( navMode == "Orbit" ) {
-       this.model.nav.mode = "ORBIT";
-        this.model.nav.observerHeight = this.model.nav.standardHeight.drone;
+       this.nav.mode = "ORBIT";
+        this.nav.observerHeight = this.nav.standardHeight.drone;
       this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
           this.model.startpos.y * this.model.scaleres);
     }
 },
 setObserverHeight(height: number) {
 
-    this.model.nav.observerHeight = height;
+    this.nav.observerHeight = height;
     
     this.GUI_navSetCameraXY(null, null);
 
@@ -975,105 +703,15 @@ setObserverHeight(height: number) {
     var currentSId = 0;
     const damage = ["O10566834"];
 
-    let itemId = document.getElementById("itemId") as HTMLInputElement;
-    var entityId = itemId.value;
-
-    this.xktLoader = new XKTLoaderPlugin(this.viewer);
-
-    var t0 = performance.now();
-    document.getElementById("stats1")!.innerHTML = "Loading model...";
-
-    // this.xktLoader.globalizeObjectIds = true;
-
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-
-    this.modelparts = [];
-    this.modelrooms = [];
-    var modelinitialIndex = 0;
-    var max: number = this.model.partsCount;
-    var i: number;
-
     
+    var entityId = this.itemId;
 
-    for (i = 1; i <= max; i++) {
+    this.loader = new ModelLoader(this.viewer, this.model);
 
-  this.modelparts.push("");
-      var navPart = document.getElementById("navPARTS" + i) as HTMLInputElement;
-      if (navPart.checked) {
-        //alert('load model' + "./XKTFiles/REQ-" + this.model.xktreq + ".xkt");
-        modelinitialIndex = i - 1;
-        this.modelparts[modelinitialIndex] = this.xktLoader.load({
-          id: "myModel" + i,
-          //src: "./XKTFiles/REQ-" + this.model.xktreq + ".xkt",
-          src: "http://localhost:57914/api/v1/asset/xkt/REQ-" + this.model.xktreq + ".xkt",
-          edges: true,
-          saoEnabled: true,
-          pbrEnabled: false,
-          backfaces: true,
-          includeTypes: [
-            "furniturePart",
-            "IfcFace",
-            "IfcWallStandardCase",
-            "IfcBuildingElementProxy",
-            "IfcFlowController",
-            "IfcBuildingElementProxyType",
-            "IfcFlowTerminal",
-            "IfcPlate",
-            "IfcMemberType",
-            "IfcRelFillsElement",
-            "IfcDoor",
-            "IfcCovering",
-            "IfcCoveringType",
-            "IfcPlateType",
-            "IfcSpace",
-            "IfcSpaceType",
-            "IfcSlab",
-            "IfcSlabType",
-            "IfcWindow",
-            "IfcRelContainedInSpatialStructure",
-            "IfcFurnishingElement",
-            "IfcDoorLiningProperties",
-            "IfcDoorPanelProperties",
-            "IfcDoorStyle",
-            "IfcConnectedFaceSet",
-            "IfcCurtainWall",
-            "IfcRailing",
-            "IfcRoof",
-            "IfcWindowLiningProperties",
-            "IfcWindowStyle",
-            "IfcWallType",
-            "IfcWall",
-            "IfcDistributionElementType",
-            "IfcStairFlight",
-            "IfcStairFlightType",
-            "IfcStair",
-            "IfcRailingType",
-            "IfcColumn",
-            "IfcCurtainWallType",
-            "IfcBuildingStorey",
-            "IfcColumnType",
-            "IfcBuilding",
-            "IfcSite",
-          ],
-          //includeTypes:["IfcPolyLoop","IfcFace","IfcFaceOuterBound","IfcCartesianPoint","IfcAxis2Placement3D","IfcShapeRepresentation","IfcLocalPlacement","IfcDirection","IfcProductDefinitionShape","IfcPolyline","IfcExtrudedAreaSolid","IfcMappedItem","IfcAxis2Placement2D","IfcBuildingElementProxy","IfcCompositeCurveSegment","IfcRectangleProfileDef","IfcFacetedBrep","IfcClosedShell","IfcWallStandardCase","IfcArbitraryClosedProfileDef","IfcFaceBound","IfcTrimmedCurve","IfcCircle","IfcRepresentationMap","IfcArbitraryProfileDefWithVoids","IfcFlowTerminal","IfcCompositeCurve","IfcCovering","IfcSpace","IfcDoor","IfcWindow","IfcFurnishingElement","IfcRelContainedInSpatialStructure","IfcBooleanClippingResult","IfcPlane","IfcCircleProfileDef","IfcSlab","IfcRoof","IfcHalfSpaceSolid","IfcCurtainWall","IfcConnectedFaceSet","IfcFlowController","IfcRailing","IfcWall","IfcCircleHollowProfileDef","IfcPolygonalBoundedHalfSpace","IfcStair","IfcOrganization","IfcGeometricRepresentationSubContext","IfcFaceBasedSurfaceModel","IfcBuildingStorey","IfcOwnerHistory","IfcPersonAndOrganization","IfcPerson","IfcApplication","IfcGeometricRepresentationContext","IfcCartesianTransformationOperator3D"]
-        });
-      } else {
-        // NADA
-      }
-    }
+    this.loader.load(
 
-    // Add a StoreyViewsPlugin
-
-    //const storeyViewsPlugin = new StoreyViewsPlugin(this.viewer);
-
-    this.modelparts[modelinitialIndex].on("loaded", () => {
-      var t1 = performance.now();
-      document.getElementById("stats1")!.innerHTML =
-        "Model 1 loaded in " +
-        Math.floor(t1 - t0) / 1000.0 +
-        " seconds<br>Objects: " +
-        this.modelparts[modelinitialIndex].numEntities;
+      () => {
+      
 
       const objectsMemento = new ObjectsMemento();
       objectsMemento.saveObjects(this.viewer.scene);
@@ -1247,7 +885,7 @@ setObserverHeight(height: number) {
       //this.viewer.scene.input.KEY_Q = 999;
 
       //const onKeyDown = this.viewer.scene.input.on("keydown", (keyCode) => {
-      //  if (this.model.nav.mode == 'DRONE') {
+      //  if (this.nav.mode == 'DRONE') {
       //
       //    switch (keyCode) {
       //      case 81:
@@ -1292,8 +930,10 @@ setObserverHeight(height: number) {
             );
           } else {
             var hilightonoff = !entity.highlighted;
-            var itemId = document.getElementById("itemId") as HTMLInputElement;
-            itemId.value = entity.id;
+            
+            this.itemId = entity.id;
+            // TODO: FIRE EVENT
+
             entityId = entity.id;
             ent = this.viewer.scene.objects[entityId];
             ent.highlighted = hilightonoff;
@@ -1669,8 +1309,8 @@ setObserverHeight(height: number) {
 
     console.log("SET NAV MODE FPV");
 
-    this.model.nav.mode = "FPV";
-    this.model.nav.observerHeight = this.model.nav.standardHeight.person;
+    this.nav.mode = "FPV";
+    this.nav.observerHeight = this.nav.standardHeight.person;
     document.getElementById("navmodeFPV")!.style.backgroundColor = "#88F";
     document.getElementById("navmodeDRONE")!.style.backgroundColor = "";
     document.getElementById("navmodeORBIT")!.style.backgroundColor = "";
@@ -1698,8 +1338,8 @@ setObserverHeight(height: number) {
   },
 
   GUI_navmodeDRONE(IFC_x_cm, IFC_Y_cm) {
-    this.model.nav.mode = "DRONE";
-    this.model.nav.observerHeight = this.model.nav.standardHeight.drone;
+    this.nav.mode = "DRONE";
+    this.nav.observerHeight = this.nav.standardHeight.drone;
     document.getElementById("navmodeFPV")!.style.backgroundColor = "";
     document.getElementById("navmodeDRONE")!.style.backgroundColor = "#88F";
     document.getElementById("navmodeORBIT")!.style.backgroundColor = "";
@@ -1726,7 +1366,7 @@ setObserverHeight(height: number) {
   },
 
   GUI_navmodeORBIT(IFC_x_cm, IFC_Y_cm) {
-    this.model.nav.mode = "ORBIT";
+    this.nav.mode = "ORBIT";
     this.viewer.cameraControl.navMode = "orbit";
 
 
@@ -1817,14 +1457,14 @@ setObserverHeight(height: number) {
       // }
     }
   },
-  //Sets the camera position, height and direction based on the passed X,Y and current this.model.nav.mode
+  //Sets the camera position, height and direction based on the passed X,Y and current this.nav.mode
   GUI_navSetCameraXY(IFC_x_cm, IFC_y_cm) {
     if (IFC_x_cm == null) {
       //If no new XY supplied then use current camera position.
       IFC_x_cm = this.viewer.scene.camera.eye[0];
       IFC_y_cm = this.viewer.scene.camera.eye[1];
     }
-    if (this.model.nav.mode == "FPV") {
+    if (this.nav.mode == "FPV") {
       //FPV current view direction maintained, (option for focus retain), observer height used.
       //Find current view direction vector (offset)
       this.cameraControl.navMode = "firstPerson";
@@ -1837,9 +1477,9 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.model.nav.observerHeight,
+        this.model.current_elev * 0.1 + this.nav.observerHeight,
       ];
-      if (this.model.nav.targetLock) {
+      if (this.nav.targetLock) {
         //Retain current target point.
         this.viewer.scene.camera.look = [
           this.model.cen.x * this.model.scaleres,
@@ -1854,11 +1494,11 @@ setObserverHeight(height: number) {
         this.viewer.scene.camera.look = [
           IFC_x_cm + viewdir_x,
           IFC_y_cm + viewdir_y,
-          this.model.current_elev * 0.1 + this.model.nav.observerHeight,
+          this.model.current_elev * 0.1 + this.nav.observerHeight,
         ];
       }
     }
-    if (this.model.nav.mode == "DRONE") {
+    if (this.nav.mode == "DRONE") {
       //DRONE so look straight down. (try and maintain rotation orientation)
       //Find current view direction vector (offset)
       //var viewdir_x = this.viewer.scene.camera.look[0] - this.viewer.scene.camera.eye[0];
@@ -1872,7 +1512,7 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.model.nav.observerHeight,
+        this.model.current_elev * 0.1 + this.nav.observerHeight,
       ];
       this.viewer.scene.camera.look = [
         IFC_x_cm + 1,
@@ -1881,7 +1521,7 @@ setObserverHeight(height: number) {
       ]; //Always go to looking 5m towards X
     }
 
-    if (this.model.nav.mode == "ORBIT") {
+    if (this.nav.mode == "ORBIT") {
       //DRONE so look straight down. (try and maintain rotation orientation)
       //Find current view direction vector (offset)
       //var viewdir_x = this.viewer.scene.camera.look[0] - this.viewer.scene.camera.eye[0];
@@ -1890,7 +1530,7 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.model.nav.observerHeight,
+        this.model.current_elev * 0.1 + this.nav.observerHeight,
       ];
       this.viewer.scene.camera.look = [
         this.model.cen.x * this.model.scaleres,
@@ -1934,8 +1574,8 @@ setObserverHeight(height: number) {
     document.getElementById("navmodeELEV")!.innerHTML = flrCode;
     //When change floor force the camera to be the elevation +1.5m
     //alert(this.model.current_elev + ' eyez=' + viewer.scene.camera.eye[2]);
-    //viewer.scene.camera.look = [viewer.scene.camera.look[0], viewer.scene.camera.look[1], (this.model.current_elev * 0.1) + this.model.nav.observerHeight];
-    //viewer.scene.camera.eye = [viewer.scene.camera.eye[0], viewer.scene.camera.eye[1], (this.model.current_elev * 0.1) + this.model.nav.observerHeight];
+    //viewer.scene.camera.look = [viewer.scene.camera.look[0], viewer.scene.camera.look[1], (this.model.current_elev * 0.1) + this.nav.observerHeight];
+    //viewer.scene.camera.eye = [viewer.scene.camera.eye[0], viewer.scene.camera.eye[1], (this.model.current_elev * 0.1) + this.nav.observerHeight];
     this.GUI_navSetCameraXY(null, null);
   },
 
@@ -2016,12 +1656,12 @@ setObserverHeight(height: number) {
     
     // TODO
     
-    // if (this.model.nav.targetLock) {
-    //     this.model.nav.targetLock = false;
+    // if (this.nav.targetLock) {
+    //     this.nav.targetLock = false;
     //     document.getElementById("navmodeTARGETLOCK").style.backgroundColor = '';
     //     SVGelement.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlockoff.png');
     // } else {
-    //     this.model.nav.targetLock = true;
+    //     this.nav.targetLock = true;
     //     document.getElementById("navmodeTARGETLOCK").style.backgroundColor = '#88F';
     //     SVGelement.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlock.png');
     // }
@@ -2038,33 +1678,20 @@ setObserverHeight(height: number) {
     // TODO
     // var roomtoload = document.getElementById('navROOMLST').options[document.getElementById('navROOMLST').selectedIndex].text;
     // roomtoload = roomtoload.substring(roomtoload.indexOf('-') + 1);
-    // if (this.model.nav.loadedRooms.indexOf(',' + roomtoload + ',') > -1) {
+    // if (this.nav.loadedRooms.indexOf(',' + roomtoload + ',') > -1) {
     //     alert('Room ' + roomtoload + ' is already loaded.');
     // } else {
 
 
-    //     this.model.nav.loadedRooms += roomtoload + ',';
+    //     this.nav.loadedRooms += roomtoload + ',';
     //     var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0];
     //     for (var child = SVGelement.firstChild; child !== null; child = child.nextSibling) {
-    //         if (this.model.nav.loadedRooms.indexOf(',' + child.id + ',') > -1) {
+    //         if (this.nav.loadedRooms.indexOf(',' + child.id + ',') > -1) {
     //             child.setAttribute('fill', '#1fa0f0');
     //         }
     //     }
 
-    //     this.modelrooms.push('');
-    //     //    alert('Load room REQ-101-' + document.getElementById('navROOMLST').value + '.xkt');
-    //     var nextroomindex = this.modelrooms.length - 1;
-    //     this.modelrooms[nextroomindex] = this.xktLoader.load({
-    //         id: "Room" + nextroomindex,
-    //         src: "http://localhost:57914/api/v1/asset/xkt/REQ-101-" + document.getElementById('navROOMLST').value + ".xkt",
-    //         //src: "./XKTFiles/REQ-101-" + document.getElementById('navROOMLST').value + ".xkt",
-    //         edges: true,
-    //         saoEnabled: true,
-    //         pbrEnabled: false,
-    //         backfaces: true,
-    //         includeTypes: ["furniturePart", "IfcFace", "IfcWallStandardCase", "IfcBuildingElementProxy", "IfcFlowController", "IfcBuildingElementProxyType", "IfcFlowTerminal", "IfcPlate", "IfcMemberType", "IfcRelFillsElement", "IfcDoor", "IfcCovering", "IfcCoveringType", "IfcPlateType", "IfcSpace", "IfcSpaceType", "IfcSlab", "IfcSlabType", "IfcWindow", "IfcRelContainedInSpatialStructure", "IfcFurnishingElement", "IfcDoorLiningProperties", "IfcDoorPanelProperties", "IfcDoorStyle", "IfcConnectedFaceSet", "IfcCurtainWall", "IfcRailing", "IfcRoof", "IfcWindowLiningProperties", "IfcWindowStyle", "IfcWallType", "IfcWall", "IfcDistributionElementType", "IfcStairFlight", "IfcStairFlightType", "IfcStair", "IfcRailingType", "IfcColumn", "IfcCurtainWallType", "IfcBuildingStorey", "IfcColumnType", "IfcBuilding", "IfcSite"]
-    //         //includeTypes:["IfcPolyLoop","IfcFace","IfcFaceOuterBound","IfcCartesianPoint","IfcAxis2Placement3D","IfcShapeRepresentation","IfcLocalPlacement","IfcDirection","IfcProductDefinitionShape","IfcPolyline","IfcExtrudedAreaSolid","IfcMappedItem","IfcAxis2Placement2D","IfcBuildingElementProxy","IfcCompositeCurveSegment","IfcRectangleProfileDef","IfcFacetedBrep","IfcClosedShell","IfcWallStandardCase","IfcArbitraryClosedProfileDef","IfcFaceBound","IfcTrimmedCurve","IfcCircle","IfcRepresentationMap","IfcArbitraryProfileDefWithVoids","IfcFlowTerminal","IfcCompositeCurve","IfcCovering","IfcSpace","IfcDoor","IfcWindow","IfcFurnishingElement","IfcRelContainedInSpatialStructure","IfcBooleanClippingResult","IfcPlane","IfcCircleProfileDef","IfcSlab","IfcRoof","IfcHalfSpaceSolid","IfcCurtainWall","IfcConnectedFaceSet","IfcFlowController","IfcRailing","IfcWall","IfcCircleHollowProfileDef","IfcPolygonalBoundedHalfSpace","IfcStair","IfcOrganization","IfcGeometricRepresentationSubContext","IfcFaceBasedSurfaceModel","IfcBuildingStorey","IfcOwnerHistory","IfcPersonAndOrganization","IfcPerson","IfcApplication","IfcGeometricRepresentationContext","IfcCartesianTransformationOperator3D"]
-    //     });
+  
 
     //     this.modelrooms[nextroomindex].on("loaded", () => {
     //         var t1 = performance.now();
@@ -2147,21 +1774,13 @@ setObserverHeight(height: number) {
         //alert('turn on' + e.target.value);
         //var p0 = performance.now();
         //document.getElementById("stats2").innerHTML = "Loading this.model 2...";
-        this.modelparts[partIndex] = this.xktLoader.load({
-            //this.model2 = xktLoader.load({
-            id: "myModel2",
-            //src: "./XKTFiles/" + e.target.value + ".xkt",
-            src: "http://localhost:57914/api/v1/asset/xkt/" + e.target.value + ".xkt",
-            edges: true,
-            saoEnabled: true,
-            pbrEnabled: false,
-            backfaces: true,
-            includeTypes: ["furniturePart", "IfcFace", "IfcWallStandardCase", "IfcBuildingElementProxy", "IfcFlowController", "IfcBuildingElementProxyType", "IfcFlowTerminal", "IfcPlate", "IfcMemberType", "IfcRelFillsElement", "IfcDoor", "IfcCovering", "IfcCoveringType", "IfcPlateType", "IfcSpace", "IfcSpaceType", "IfcSlab", "IfcSlabType", "IfcWindow", "IfcRelContainedInSpatialStructure", "IfcFurnishingElement", "IfcDoorLiningProperties", "IfcDoorPanelProperties", "IfcDoorStyle", "IfcConnectedFaceSet", "IfcCurtainWall", "IfcRailing", "IfcRoof", "IfcWindowLiningProperties", "IfcWindowStyle", "IfcWallType", "IfcWall", "IfcDistributionElementType", "IfcStairFlight", "IfcStairFlightType", "IfcStair", "IfcRailingType", "IfcColumn", "IfcCurtainWallType", "IfcBuildingStorey", "IfcColumnType", "IfcBuilding", "IfcSite"]
-            //includeTypes: ["IfcFace", "IfcDistributionPort", "IfcRelConnectsPortToElement", "IfcRelConnectsPorts", "IfcClosedShell", "IfcCovering", "IfcFlowSegment", "IfcFlowFitting", "IfcRelCoversBldgElements", "IfcRelAssociatesMaterial", "IfcBuildingElementProxy", "IfcFlowTerminal", "IfcFaceBound", "IfcSystem", "IfcRelServicesBuildings", "IfcConnectedFaceSet", "IfcBuildingElementProxyType", "IfcSlab", "IfcSlabType", "IfcSpace", "IfcSpaceType", "IfcRelContainedInSpatialStructure", "IfcBuildingStorey", "IfcBuilding", "IfcSite", "IfcZone"]
-        });
+
+        this.loader.loadPart(partIndex, e.target.value);
+
+        
     } else {
         //alert('turn off' + e.target.value);
-        this.modelparts[partIndex].destroy();
+        this.loader.removePart(partIndex);
     }
 },
 
@@ -2210,59 +1829,6 @@ setObserverHeight(height: number) {
 
 
 
-
- GUI_refreshSVGcampos() {
-    var svg_doc = document.getElementById('navBIRDSEYEdiv')?.children[0];
-    if( !svg_doc )
-      return;
-    try {
-      // TODO
-        // var viewbox = svg_doc.getAttribute('viewBox')?.split(" ");
-        // var viewboxminy = Number(viewbox[1]);
-        // var viewboxhgt = Number(viewbox[3]);
-        // var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
-
-        // var SVGx = (this.viewer.scene.camera.eye[0] * 10);
-        // var SVGy = SVGtruminy - ((this.viewer.scene.camera.eye[1] * 10));
-
-        // document.getElementById("SVGPOSCAM").setAttribute("cx", ""+ SVGx);
-        // document.getElementById("SVGPOSCAM").setAttribute("cy", ""+ SVGy);
-        // document.getElementById("SVGPOSCAM").setAttribute("r", ""+ 2000 / this.model.birdsEye.boxscale);
-
-        // document.getElementById("SVGDIRCAM").setAttribute("x1", ""+SVGx);
-        // document.getElementById("SVGDIRCAM").setAttribute("y1", ""+SVGy);
-        // SVGx = (this.viewer.scene.camera.look[0] * 10);
-        // SVGy = SVGtruminy - ((this.viewer.scene.camera.look[1] * 10));
-        // document.getElementById("SVGDIRCAM").setAttribute("x2", ""+ SVGx);
-        // document.getElementById("SVGDIRCAM").setAttribute("y2", ""+SVGy);
-
-
-
-        //alert(this.viewer.scene.camera.eye[0]);
-        //alert(SVGdoc.getElementById("SVGCAMPOS").)
-    } catch (err) {
-        // NADA
-    }
-    document.getElementById('DEBUGINFO')!.innerHTML = 'Obj Count=' + this.viewer.scene.numObjects +
-        ' campos ' + Math.round(this.viewer.scene.camera.eye[0]) + ',' +
-        Math.round(this.viewer.scene.camera.eye[1]) + ',' +
-        Math.round(this.viewer.scene.camera.eye[2]) + 'camlook ' +
-        Math.round(this.viewer.scene.camera.look[0]) + ',' +
-        Math.round(this.viewer.scene.camera.look[1]) + ',' +
-        Math.round(this.viewer.scene.camera.look[2]) + 'camUP ' +
-        Math.round(this.viewer.scene.camera.up[0]) + ',' +
-        Math.round(this.viewer.scene.camera.up[1]) + ',' +
-        Math.round(this.viewer.scene.camera.up[2]);
-
-    //Set elevation icon
-    svg_doc = document.getElementById('navELEVATIONgraphic')!;
-    document.getElementById("SVGPOSCAMelev")?.setAttribute("cy", "" + (300 - ((this.viewer.scene.camera.eye[2] * 10) * this.model.elevationScale)));
-
-
-},
-
-
-
  GUI_setSVGassetpos() {
     var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0];
     try {
@@ -2278,7 +1844,7 @@ setObserverHeight(height: number) {
         // var targetsize = 6000;
         // document.getElementById("SVGPOSASSET").setAttribute("x", "" + (this.model.cen.x - ((targetsize / this.model.birdsEye.boxscale) * 0.5)));
         // document.getElementById("SVGPOSASSET").setAttribute("y", "" + (SVGtruminy - (this.model.cen.y + ((targetsize / this.model.birdsEye.boxscale) * 0.5))));
-        // if (this.model.nav.targetLock) {
+        // if (this.nav.targetLock) {
         //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlock.png');
         // } else {
         //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlockoff.png');
@@ -2286,7 +1852,7 @@ setObserverHeight(height: number) {
         // document.getElementById("SVGPOSASSET").setAttribute("width", "" + targetsize / this.model.birdsEye.boxscale);
         // document.getElementById("SVGPOSASSET").setAttribute("height", "" + targetsize / this.model.birdsEye.boxscale);
 
-        this.GUI_refreshSVGcampos();
+        //this.GUI_refreshSVGcampos();
     } catch (err) {
         // NADA
     }
@@ -2415,12 +1981,11 @@ GUI_actionDETAILS() {
     // }
 },
 
-GUI_actionGOTO() {
+GUI_actionGOTO(targetID: string) {
 
     console.log("GUI_actionGOTO");
 
-    //document.getElementById("showItem").onclick = (e) => {
-    var targetID = (document.getElementById("itemId") as HTMLInputElement).value;
+    //document.getElementById("showItem").onclick = (e) => {    
     if (targetID.indexOf('_M') > targetID.length - 6) {
         targetID = targetID.substring(0, targetID.indexOf('_M'));
 
@@ -2428,6 +1993,7 @@ GUI_actionGOTO() {
     const entity = this.viewer.scene.objects[targetID];
     if (entity) {
         this.ADBGoToItem3d(entity.aabb);
+        this.itemId = targetID;
     }
 
     //if (mode == "2d") {

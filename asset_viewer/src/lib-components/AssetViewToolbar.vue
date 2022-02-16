@@ -63,8 +63,6 @@ onclick="GUI_togglecutplane()"
 
 
 
-   <input id='itemId' type='text' value='' style='float:left;width:260px;'/> 
-
  </div>
 </template>
 <style scoped>
