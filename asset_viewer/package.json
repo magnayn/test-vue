@@ -1,7 +1,7 @@
 {
   "name": "@swg/lib",
   "description": "UI Components for SWG",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "dist/wooyay.ssr.js",
   "browser": "dist/wooyay.esm.js",
   "module": "dist/wooyay.esm.js",
