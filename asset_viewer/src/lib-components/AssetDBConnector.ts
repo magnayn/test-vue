@@ -2,6 +2,7 @@
 export interface AssetDBClientOptions {
     baseUrl: string;
     token?: string;
+    tenantId?: string;
 }
 
 export default class AssetDBClient {
@@ -12,14 +13,15 @@ export default class AssetDBClient {
         this.options = options
     }
 
-    async fetchModel(id: string) {
+    async fetchModel(id: string, scope: string) {
 
         const requestHeaders = new Headers({
-            'Authorization': this.options.token ? `Bearer ${this.options.token}` : ""
+            'Authorization': this.options.token ? `Bearer ${this.options.token}` : "",
+            'x-tenant-id': `${this.options.tenantId}`,
         });
 
         const response = await fetch(
-            `${this.options.baseUrl}/api/v1/asset/model/${id}`, {
+            `${this.options.baseUrl}/api/FindView/?bimobjectid=${id}&scope=${scope}`, {
             headers: requestHeaders
         }
         );
@@ -29,7 +31,7 @@ export default class AssetDBClient {
         return data;
     }
 
-    getXKTUrlFor(id: string) {
-        return `${this.options.baseUrl}/api/v1/asset/xkt/REQ-${id}.xkt`;
+    getXKTUrlFor(x:string) {
+        return x;
     }
 }

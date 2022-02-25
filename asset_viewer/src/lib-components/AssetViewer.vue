@@ -18,7 +18,8 @@ import AssetDBClient from './AssetDBConnector';
 
 export default defineComponent( {
     props: {
-        xktId: String,
+        bimId: String,
+        scope: String,
         client: AssetDBClient
     },
     components: {
@@ -33,15 +34,16 @@ export default defineComponent( {
     },
     async mounted() {
         console.log("..Mounted");
-        console.log(this.xktId);
+        console.log(this.bimId);
+        console.log(this.scope);
         console.log(this.client);
 
-        this.model = await this.client?.fetchModel(this.xktId ?? "");
+        this.model = await this.client?.fetchModel(this.bimId ?? "", this.scope ?? "Building");
         
     },
     updated() {
          console.log("..Updated");
-        console.log(this.xktId);
+        console.log(this.bimId);
         console.log(this.client);
     },
     methods: {

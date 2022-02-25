@@ -48,7 +48,7 @@ export default class ModelLoader {
           modelinitialIndex = i - 1;
           this.modelparts[modelinitialIndex] = this.xktLoader.load({
             id: "myModel" + i,
-            src: this.assetDBClient.getXKTUrlFor(this.model.xktreq),
+            src: this.model.XktUrl,
             edges: true,
             saoEnabled: true,
             pbrEnabled: false,

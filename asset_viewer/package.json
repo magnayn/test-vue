@@ -1,7 +1,7 @@
 {
   "name": "@swg/lib",
   "description": "UI Components for SWG",
-  "version": "0.2.1",
+  "version": "0.2.5",
   "main": "dist/wooyay.ssr.js",
   "browser": "dist/wooyay.esm.js",
   "module": "dist/wooyay.esm.js",
@@ -9,7 +9,8 @@
   "types": "dist/types/src/entry.esm.d.ts",
   "files": [
     "dist/*",
-    "src/**/*.vue"
+    "src/**/*.vue",
+    "public/*"
   ],
   "sideEffects": false,
   "scripts": {
@@ -23,12 +24,10 @@
   },
   "dependencies": {
     "@xeokit/xeokit-sdk": "^2.2.3",
-    "core-js": "^3.6.5",
-    "devextreme": "^21.2.5",
-    "devextreme-vue": "^21.2.5"
+    "core-js": "^3.6.5"
   },
   "peerDependencies": {
-    "vue": "^3.2.21"
+
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -55,7 +54,9 @@
     "rollup-plugin-vue": "^6.0.0",
     "ttypescript": "^1.5.12",
     "typescript": "^4.0.3",
-    "vue": "^3.2.21"
+    "vue": "^3.2.21",
+    "devextreme": "^21.2.5",
+    "devextreme-vue": "^21.2.5"
   },
   "eslintConfig": {
     "root": true,

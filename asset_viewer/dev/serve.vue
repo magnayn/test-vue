@@ -6,7 +6,8 @@ import { AssetViewer, AssetViewToolbar} from '@/entry.esm';
 import AssetDBClient from '../src/lib-components/AssetDBConnector';
 
 const client = new AssetDBClient( {
-            baseUrl: "http://localhost:57914"
+            baseUrl: "http://localhost:7071",
+            tenantId: "F3054CC9-77E5-4EAC-A310-39CAC4ACAF3E"
         });
 
 export default defineComponent({
@@ -16,7 +17,7 @@ export default defineComponent({
     AssetViewToolbar
    },
    data() { return {
-     xktId: "534",
+     bimId: "B77B1FB6-FCC7-4A68-B296-B0660C60280C",
      client: client
    
 }; }})
@@ -25,7 +26,8 @@ export default defineComponent({
 
 <template>
   <div id="app">
-     <asset-viewer :xktId="xktId" :client="client"></asset-viewer>
+    hello
+     <asset-viewer :bimId="bimId" :client="client"></asset-viewer>
 
   </div>
 </template>

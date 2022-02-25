@@ -700,7 +700,7 @@ setObserverHeight(height: number) {
         return;
       }
 
-         this.itemId = this.model.default_object;
+         this.itemId = this.model.DefaultObject;
 
     
 
@@ -1800,45 +1800,9 @@ setObserverHeight(height: number) {
     }
 },
 
- GUI_setSVGcampos(e) {
-    var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0] as SVGSVGElement;//document.getElementById('navBIRDSEYE').getSVGDocument()?.children[0];
-    var pt = SVGelement.createSVGPoint();
-    var viewbox = SVGelement.getAttribute('viewBox')?.split(" ");
-    if( viewbox ) {
-      var viewboxminy = Number(viewbox[1] ?? 0);
-      var viewboxhgt = Number(viewbox[3] ?? 0);
-      var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
+ GUI_setSVGcampos(e) {    
+      // Later.
     
-    pt.x = e.clientX;
-    pt.y = e.clientY;
-    //debugger;
-    
-    
-    // TODO
-    // if (e.srcElement) {
-    //     var roomID = e.srcElement.id;
-    //     //document.getElementById('navROOMLST').value = roomID;
-    //     var dd = document.getElementById('navROOMLST');
-    //     for (var i = 0; i < dd.options.length; i++) {
-    //         if (dd.options[i].text.indexOf('-' + roomID) > -1) {
-    //             dd.selectedIndex = i;
-    //             break;
-    //         }
-    //     }
-    // }
-
-    // The cursor point, translated into svg coordinates - 
-
-    // TODO
-    // var cursorpt = pt.matrixTransform(SVGelement.getScreenCTM().inverse());
-    // var IFC_x_cm = cursorpt.x * 0.1;
-    // var IFC_y_cm = (SVGtruminy - cursorpt.y) * 0.1;
-
-    // this.GUI_navSetCameraXY(IFC_x_cm, IFC_y_cm);
-    // if (e.srcElement.getAttribute("fill") == '#ebba1c' && e.shiftKey == false) {
-    //     this.GUI_actionPARTSroom();
-    // }
-    }
 
 
 },
