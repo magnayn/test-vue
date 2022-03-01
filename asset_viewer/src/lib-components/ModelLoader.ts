@@ -1,3 +1,4 @@
+import { ModelType } from "@/interfaces/ModelInterfaces";
 import {
     Viewer,
     SectionPlanesPlugin,
@@ -14,6 +15,26 @@ import {
   } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 import AssetDBClient from "./AssetDBConnector";
 
+
+/*
+  "id":"c7c38318-0af1-4548-b8bb-b8a0d09abf63","modelId":"c7c38318-0af1-4548-b8bb-b8a0d09abf63",
+  "floorList":[{"id":"00000000-0000-0000-0000-000000000000","name":"Ground","elevation":0.0},
+  {"id":"00000000-0000-0000-0000-000000000000","name":"First","elevation":3899.99999999962},
+  {"id":"00000000-0000-0000-0000-000000000000","name":"Roof","elevation":7800.0}],
+  
+  "xktUrl":"https://saassetdbdev.blob.core.windows.net/xkt/f3054cc9-77e5-4eac-a310-39cac4acaf3e/c7c38318-0af1-4548-b8bb-b8a0d09abf63/geometr
+  y.xkt?sv=2020-08-04&se=2022-02-25T13%3A12%3A06Z&sr=b&sp=rw&sig=jkiAjaVEtot%2BnBVnfViI10smoB3xLcpc%2BTOBXQNboCE%3D",
+  
+  
+  "scaleRes":0.1,"elevationScale":0.0384615384615385,"startPos":{"x":-34496.48,"y":-23249.02,"z":4580.465},
+  "min":{"x":-34496.48,"y":-23249.02,"z":-181.0},"cen":{"x":-323.805,"y":7.88999999999942,"z":4580.465},"max":null,"partsCount":1,
+  
+  "cutPlane":{"upper":3799.99999999962,"lower":7800.0},"defaultObject":"c7c38318-0af1-4548-b8bb-b8a0d09abf63",
+  "focusRange":2000.0,"birdsEye":{"boxScale":1.0}}
+*/
+
+
+
 export default class ModelLoader {
 
     constructor(viewer, model) {
@@ -25,7 +46,7 @@ export default class ModelLoader {
     modelrooms: any[] = [];
     xktLoader: any;
   
-    model: any;
+    model: ModelType;
   
     get assetDBClient():AssetDBClient {
         return this.model.assetDBClient;
@@ -37,6 +58,8 @@ export default class ModelLoader {
       var max: number = this.model.partsCount;
       var i: number;
   
+      // DEBUG
+      //this.model.xktUrl = "http://localhost:57914/api/v1/asset/xkt/DL1.xkt";
       
   
       for (i = 1; i <= max; i++) {
@@ -48,9 +71,9 @@ export default class ModelLoader {
           modelinitialIndex = i - 1;
           this.modelparts[modelinitialIndex] = this.xktLoader.load({
             id: "myModel" + i,
-            src: this.model.XktUrl,
+            src: this.model.xktUrl,
             edges: true,
-            saoEnabled: true,
+            /*saoEnabled: true,
             pbrEnabled: false,
             backfaces: true,
             includeTypes: [
@@ -97,7 +120,7 @@ export default class ModelLoader {
               "IfcColumnType",
               "IfcBuilding",
               "IfcSite",
-            ],
+            ],*/
             //includeTypes:["IfcPolyLoop","IfcFace","IfcFaceOuterBound","IfcCartesianPoint","IfcAxis2Placement3D","IfcShapeRepresentation","IfcLocalPlacement","IfcDirection","IfcProductDefinitionShape","IfcPolyline","IfcExtrudedAreaSolid","IfcMappedItem","IfcAxis2Placement2D","IfcBuildingElementProxy","IfcCompositeCurveSegment","IfcRectangleProfileDef","IfcFacetedBrep","IfcClosedShell","IfcWallStandardCase","IfcArbitraryClosedProfileDef","IfcFaceBound","IfcTrimmedCurve","IfcCircle","IfcRepresentationMap","IfcArbitraryProfileDefWithVoids","IfcFlowTerminal","IfcCompositeCurve","IfcCovering","IfcSpace","IfcDoor","IfcWindow","IfcFurnishingElement","IfcRelContainedInSpatialStructure","IfcBooleanClippingResult","IfcPlane","IfcCircleProfileDef","IfcSlab","IfcRoof","IfcHalfSpaceSolid","IfcCurtainWall","IfcConnectedFaceSet","IfcFlowController","IfcRailing","IfcWall","IfcCircleHollowProfileDef","IfcPolygonalBoundedHalfSpace","IfcStair","IfcOrganization","IfcGeometricRepresentationSubContext","IfcFaceBasedSurfaceModel","IfcBuildingStorey","IfcOwnerHistory","IfcPersonAndOrganization","IfcPerson","IfcApplication","IfcGeometricRepresentationContext","IfcCartesianTransformationOperator3D"]
           });
        // } else {

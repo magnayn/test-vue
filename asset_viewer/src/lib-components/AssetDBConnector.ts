@@ -21,7 +21,7 @@ export default class AssetDBClient {
         });
 
         const response = await fetch(
-            `${this.options.baseUrl}/api/FindView/?bimobjectid=${id}&scope=${scope}`, {
+            `${this.options.baseUrl}/FindView/?bimobjectid=${id}&scope=${scope}`, {
             headers: requestHeaders
         }
         );

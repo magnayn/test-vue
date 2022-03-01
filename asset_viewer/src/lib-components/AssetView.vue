@@ -465,8 +465,10 @@ import {
   XKTLoaderPlugin,
 } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 
-import ModelLoader  from './ModelLoader';
+
+import ModelLoader from './ModelLoader';
 import AssetDBClient from "./AssetDBConnector";
+import { ModelType } from "../interfaces/ModelInterfaces";
 
 //function AJstatechgVIEWER(){ if(xhr.readyState==4){  if(xhr.status==200){viewer_ajaxresults(xhr.responseText);  } }}
 
@@ -490,6 +492,7 @@ const canStandOnTypes = {
   IfcFloor: true,
   IfcFooting: true,
 };
+
 
 class VData {
   viewer: any;
@@ -516,7 +519,10 @@ class VData {
                     observerHeight: 160,
                     mode: "ORBIT",
                     targetLock: true,
-                    loadedRooms: ",,"
+                    loadedRooms: ",,",
+
+                    current_elev: 1,
+                    mlayout: ""
                 };
   
 
@@ -527,7 +533,9 @@ class VData {
 
 export default defineComponent({
   props: {
-    model: null,
+    model: {
+      type: Object as () => ModelType
+    },
     navMode: String
   },
   data() {
@@ -565,9 +573,9 @@ export default defineComponent({
     });
 
 
-    console.log("INITY " + this.model?.xktId);
+    console.log("INITY " + this.model?.id);
     console.log(this.nav);
-    //this.nav = this.model.nav;
+    //this.nav = this.model!.nav;
 
     console.log("OUTY");
     console.log(this.nav);
@@ -583,7 +591,7 @@ export default defineComponent({
 
     //cameraControl.navMode = "firstPerson";
 
-    //this.viewer.scene.camera.eye = [this.model.cen.x, this.model.cen.y, this.model.cen.z];
+    //this.viewer.scene.camera.eye = [this.model!.cen.x, this.model!.cen.y, this.model!.cen.z];
     //this.viewer.scene.camera.look = [0, 0, 0];
     //this.viewer.scene.camera.up = [0, 0, 1];
 
@@ -639,14 +647,14 @@ export default defineComponent({
 
 
     //Set actions for part checkboxes
-    // for (let i = 1; i <= this.model.partsCount; i++) {
+    // for (let i = 1; i <= this.model!.partsCount; i++) {
     //     document.getElementById("navPARTS" + i)!.onclick = this.GUI_navmodePARTS;
     // }
 
     this.createContextMenu();
 
     
-    // if (this.model.mlayout == "COMPACT") {
+    // if (this.nav.mlayout == "COMPACT") {
     //   //document.getElementById('flrcpPANEL').style.display = 'none';
     //   document.getElementById("actionDETAILS")!.style.display = "none";
     //   document.getElementById("actionGOTO")!.style.display = "none";
@@ -667,22 +675,22 @@ setNavMode(navMode:String) {
       this.nav.mode = "FPV";
       this.nav.observerHeight = this.nav.standardHeight.person;
       
-      this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
-          this.model.startpos.y * this.model.scaleres);
+      this.GUI_navSetCameraXY(this.model!.startPos.x * this.model!.scaleRes,
+          this.model!.startPos.y * this.model!.scaleRes);
     }
 
     if( navMode == "Drone" ) {
            this.nav.mode = "DRONE";
           this.nav.observerHeight = this.nav.standardHeight.drone;
-      this.GUI_navSetCameraXY(this.model.cen.x * this.model.scaleres,
-          this.model.cen.y * this.model.scaleres);
+      this.GUI_navSetCameraXY(this.model!.cen.x * this.model!.scaleRes,
+          this.model!.cen.y * this.model!.scaleRes);
     }
 
     if( navMode == "Orbit" ) {
        this.nav.mode = "ORBIT";
         this.nav.observerHeight = this.nav.standardHeight.drone;
-      this.GUI_navSetCameraXY(this.model.startpos.x * this.model.scaleres,
-          this.model.startpos.y * this.model.scaleres);
+      this.GUI_navSetCameraXY(this.model!.startPos.x * this.model!.scaleRes,
+          this.model!.startPos.y * this.model!.scaleRes);
     }
 },
 setObserverHeight(height: number) {
@@ -700,7 +708,7 @@ setObserverHeight(height: number) {
         return;
       }
 
-         this.itemId = this.model.DefaultObject;
+         this.itemId = ""; //this.model!.DefaultObject;
 
     
 
@@ -723,11 +731,13 @@ setObserverHeight(height: number) {
     var entityId = this.itemId;
 
     this.loader = new ModelLoader(this.viewer, this.model);
+    const ll = this.loader;
 
     this.loader.load(
 
       () => {
       
+      console.log("LOADED CALLBACK");
 
       const objectsMemento = new ObjectsMemento();
       objectsMemento.saveObjects(this.viewer.scene);
@@ -735,6 +745,12 @@ setObserverHeight(height: number) {
       const cameraMemento = new CameraMemento(); // Saves 3D perspective camera to restore
       cameraMemento.saveCamera(this.viewer.scene);
 
+
+ const camera = this.viewer.scene.camera;
+
+            camera.perspective.far = 20000;
+            this.viewer.cameraFlight.flyTo(ll.modelparts[0]);
+return;
       if (entityId != "") {
         try {
           var ent = this.viewer.scene.objects[entityId];
@@ -1331,7 +1347,7 @@ setObserverHeight(height: number) {
     document.getElementById("navmodeDRONE")!.style.backgroundColor = "";
     document.getElementById("navmodeORBIT")!.style.backgroundColor = "";
     document.getElementById("navmodeORBITsub")!.style.display = "none";
-    if (this.model.mlayout != "COMPACT") {
+    if (this.nav.mlayout != "COMPACT") {
       document.getElementById("navmodeFPVsub")!.style.display = "";
     }
 
@@ -1426,48 +1442,48 @@ setObserverHeight(height: number) {
 
       //document.getElementById("floorSections").onclick = (e) => {
 
-      //        viewer.scene.camera.look = [model.cen.x * model.scaleres, model.cen.y * model.scaleres, model.cen.z * model.scaleres];
-      if (this.model.cutplane.lower != 0) {
+      //        viewer.scene.camera.look = [model.cen.x * model.scaleRes, model.cen.y * model.scaleRes, model.cen.z * model.scaleRes];
+      if (this.model!.cutPlane.lower != 0) {
         this.sectionPlanes.clear();
         this.sectionPlanes.createSectionPlane({
           id: "Floor",
           pos: [
-            this.model.cen.x * this.model.scaleres,
-            this.model.cen.y * this.model.scaleres,
-            this.model.cutplane.lower * this.model.scaleres,
+            this.model!.cen.x * this.model!.scaleRes,
+            this.model!.cen.y * this.model!.scaleRes,
+            this.model!.cutPlane.lower * this.model!.scaleRes,
           ],
           dir: [0.0, 0.0, 1.0],
         });
       }
-      if (this.model.cutplane.upper != 0) {
+      if (this.model!.cutPlane.upper != 0) {
         this.sectionPlanes.createSectionPlane({
           id: "Ceiling",
           pos: [
-            this.model.cen.x * this.model.scaleres,
-            this.model.cen.y * this.model.scaleres,
-            this.model.cutplane.upper * this.model.scaleres,
+            this.model!.cen.x * this.model!.scaleRes,
+            this.model!.cen.y * this.model!.scaleRes,
+            this.model!.cutPlane.upper * this.model!.scaleRes,
           ],
           dir: [0.0, 0.0, -1.0],
         });
       }
 
       // TODO : WAT 1==3
-      // if (this.model.focus_range != 0 && 1 == 3) {
+      // if (this.model!.focus_range != 0 && 1 == 3) {
       //     //Define vertical cutplanes to limit range
       //     this.sectionPlanes.createSectionPlane({
       //         id: "Side1",
-      //         pos: [(this.model.cen.x -this.model.focus_range) * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres],
+      //         pos: [(this.model!.cen.x -this.model!.focus_range) * this.model!.scaleRes, this.model!.cen.y * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes],
       //         dir: [1.0, 0.0, 0.0]
       //     });
 
       //     this.sectionPlanes.createSectionPlane({
       //         id: "Side2",
-      //         pos: [this.model.cen.x * this.model.scaleres, (this.model.cen.y + this.model.focus_range) * this.model.scaleres, this.model.cen.z * this.model.scaleres],
+      //         pos: [this.model!.cen.x * this.model!.scaleRes, (this.model!.cen.y + this.model!.focus_range) * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes],
       //         dir: [0.0, -1.0, 0.0]
       //     });
       //     this.sectionPlanes.createSectionPlane({
       //         id: "Side3",
-      //         pos: [(this.model.cen.x + this.model.focus_range) * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres],
+      //         pos: [(this.model!.cen.x + this.model!.focus_range) * this.model!.scaleRes, this.model!.cen.y * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes],
       //         dir: [-1.0, 0.0, 0.0]
       //     });
       // }
@@ -1493,14 +1509,14 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.nav.observerHeight,
+        this.nav.current_elev * 0.1 + this.nav.observerHeight,
       ];
       if (this.nav.targetLock) {
         //Retain current target point.
         this.viewer.scene.camera.look = [
-          this.model.cen.x * this.model.scaleres,
-          this.model.cen.y * this.model.scaleres,
-          this.model.cen.z * this.model.scaleres,
+          this.model!.cen.x * this.model!.scaleRes,
+          this.model!.cen.y * this.model!.scaleRes,
+          this.model!.cen.z * this.model!.scaleRes,
         ];
       } else {
         var viewdir_x =
@@ -1510,7 +1526,7 @@ setObserverHeight(height: number) {
         this.viewer.scene.camera.look = [
           IFC_x_cm + viewdir_x,
           IFC_y_cm + viewdir_y,
-          this.model.current_elev * 0.1 + this.nav.observerHeight,
+          this.nav.current_elev * 0.1 + this.nav.observerHeight,
         ];
       }
     }
@@ -1528,12 +1544,12 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.nav.observerHeight,
+        this.nav.current_elev * 0.1 + this.nav.observerHeight,
       ];
       this.viewer.scene.camera.look = [
         IFC_x_cm + 1,
         IFC_y_cm + 1,
-        this.model.current_elev * 0.1,
+        this.nav.current_elev * 0.1,
       ]; //Always go to looking 5m towards X
     }
 
@@ -1546,52 +1562,52 @@ setObserverHeight(height: number) {
       this.viewer.scene.camera.eye = [
         IFC_x_cm,
         IFC_y_cm,
-        this.model.current_elev * 0.1 + this.nav.observerHeight,
+        this.nav.current_elev * 0.1 + this.nav.observerHeight,
       ];
       this.viewer.scene.camera.look = [
-        this.model.cen.x * this.model.scaleres,
-        this.model.cen.y * this.model.scaleres,
-        this.model.cen.z * this.model.scaleres,
+        this.model!.cen.x * this.model!.scaleRes,
+        this.model!.cen.y * this.model!.scaleRes,
+        this.model!.cen.z * this.model!.scaleRes,
       ]; //Always go to looking 5m towards X
     }
   },
   GUI_setFLR(flrCode) {
-    // TODO: AJpostdataVIEWER('&MODE=FLRSVG&BLDID=' + this.model.buildingID + '&FLRREF=' + flrCode);
+    // TODO: AJpostdataVIEWER('&MODE=FLRSVG&BLDID=' + this.model!.buildingID + '&FLRREF=' + flrCode);
 
     var flrElevation = 0;
     //var elevation1 = document.getElementById("navFLRLST").value;
     var flrIndex = -1;
-    for (var i = 0; i < this.model.floorList.length; i++) {
-      if (this.model.floorList[i].name == flrCode) {
+    for (var i = 0; i < this.model!.floorList.length; i++) {
+      if (this.model!.floorList[i].name == flrCode) {
         flrIndex = i;
         //if (!flrElevation) {
-        flrElevation = this.model.floorList[i].elevation;
+        flrElevation = this.model!.floorList[i].elevation;
         //}
       }
     }
 
     var level_height = 4000;
-    if (this.model.floorList.length != 1) {
+    if (this.model!.floorList.length != 1) {
       //Only 1 floor leave level height as default
-      if (flrIndex < this.model.floorList.length - 1) {
+      if (flrIndex < this.model!.floorList.length - 1) {
         level_height =
-          this.model.floorList[flrIndex + 1].elevation - flrElevation;
+          this.model!.floorList[flrIndex + 1].elevation - flrElevation;
       } else {
         level_height =
-          flrElevation - this.model.floorList[flrIndex - 1].elevation;
+          flrElevation - this.model!.floorList[flrIndex - 1].elevation;
       }
     }
     var elevation2 = flrElevation * 1 + level_height * 1; //Default allow for 3m floors
-    this.model.current_elev = flrElevation * 1.0;
-    this.model.cutplane.lower = flrElevation * 1.0;
-    this.model.cutplane.upper = elevation2 * 1.0;
+    this.nav.current_elev = flrElevation * 1.0;
+    this.model!.cutPlane.lower = flrElevation * 1.0;
+    this.model!.cutPlane.upper = elevation2 * 1.0;
     this.GUISETTING_cutplanes = false;
     this.GUI_togglecutplane();
     document.getElementById("navmodeELEV")!.innerHTML = flrCode;
     //When change floor force the camera to be the elevation +1.5m
-    //alert(this.model.current_elev + ' eyez=' + viewer.scene.camera.eye[2]);
-    //viewer.scene.camera.look = [viewer.scene.camera.look[0], viewer.scene.camera.look[1], (this.model.current_elev * 0.1) + this.nav.observerHeight];
-    //viewer.scene.camera.eye = [viewer.scene.camera.eye[0], viewer.scene.camera.eye[1], (this.model.current_elev * 0.1) + this.nav.observerHeight];
+    //alert(this.nav.current_elev + ' eyez=' + viewer.scene.camera.eye[2]);
+    //viewer.scene.camera.look = [viewer.scene.camera.look[0], viewer.scene.camera.look[1], (this.nav.current_elev * 0.1) + this.nav.observerHeight];
+    //viewer.scene.camera.eye = [viewer.scene.camera.eye[0], viewer.scene.camera.eye[1], (this.nav.current_elev * 0.1) + this.nav.observerHeight];
     this.GUI_navSetCameraXY(null, null);
   },
 
@@ -1722,38 +1738,38 @@ setObserverHeight(height: number) {
     //alert(e.target.id);
     var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0] as SVGSVGElement;
     if (e.target.id == 'navBIRDSEYEmagFit') {
-        this.model.birdsEye.boxscale = 1.0;
+        this.model!.birdsEye.boxScale = 1.0;
         SVGelement.style.width = '100%';
         SVGelement.style.height = '100%';
     }
     if (e.target.id == 'navBIRDSEYEmagx2') {
-        this.model.birdsEye.boxscale = 2.0;
+        this.model!.birdsEye.boxScale = 2.0;
         SVGelement.style.width = '200%';
         SVGelement.style.height = '200%';
         SVGelement.style.marginTop = '-100px';
     }
     if (e.target.id == 'navBIRDSEYEmagx4') {
-        this.model.birdsEye.boxscale = 4.0;
+        this.model!.birdsEye.boxScale = 4.0;
         SVGelement.style.width = '400%';
         SVGelement.style.height = '400%';
     }
     if (e.target.id == 'navBIRDSEYEmagx8') {
-        this.model.birdsEye.boxscale = 8.0;
+        this.model!.birdsEye.boxScale = 8.0;
         SVGelement.style.width = '800%';
         SVGelement.style.height = '800%';
     }
     if (e.target.id == 'navBIRDSEYEmagx16') {
-        this.model.birdsEye.boxscale = 16.0;
+        this.model!.birdsEye.boxScale = 16.0;
         SVGelement.style.width = '1600%';
         SVGelement.style.height = '1600%';
     }
     if (e.target.id == 'navBIRDSEYEmagx32') {
-        this.model.birdsEye.boxscale = 32.0;
+        this.model!.birdsEye.boxScale = 32.0;
         SVGelement.style.width = '3200%';
         SVGelement.style.height = '3200%';
     }
     if (e.target.id == 'navBIRDSEYEmagx64') {
-        this.model.birdsEye.boxscale = 64.0;
+        this.model!.birdsEye.boxScale = 64.0;
         SVGelement.style.width = '6400%';
         SVGelement.style.height = '6400%';
     }
@@ -1774,8 +1790,8 @@ setObserverHeight(height: number) {
     // var CAMpxposY = cursorpt.y - SVGbound.top;
     // var CAMpxposX = cursorpt.x - SVGbound.left;
     // //alert('CAMpxposY=' + CAMpxposY + ' SVGbound.height=' + SVGbound.height);
-    // SVGelement.style.marginTop = ((((SVGbound.height / this.model.birdsEye.boxscale) * 0.5) - CAMpxposY)) + 'px';
-    // SVGelement.style.marginLeft = ((((SVGbound.width / this.model.birdsEye.boxscale) * 0.5) - CAMpxposX)) + 'px';
+    // SVGelement.style.marginTop = ((((SVGbound.height / this.model!.birdsEye.boxScale) * 0.5) - CAMpxposY)) + 'px';
+    // SVGelement.style.marginLeft = ((((SVGbound.width / this.model!.birdsEye.boxScale) * 0.5) - CAMpxposX)) + 'px';
 
     this.GUI_setSVGassetpos();
 },
@@ -1812,8 +1828,8 @@ setObserverHeight(height: number) {
  GUI_setSVGassetpos() {
     var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0];
     try {
-        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cx", this.model.startpos.x);
-        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cy", this.model.startpos.y);
+        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cx", this.model!.startPos.x);
+        //svg_doc.getElementById("SVGPOSASSET").setAttribute("cy", this.model!.startPos.y);
 
 
         ///TODO
@@ -1822,15 +1838,15 @@ setObserverHeight(height: number) {
         // var viewboxhgt = Number(viewbox[3]);
         // var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
         // var targetsize = 6000;
-        // document.getElementById("SVGPOSASSET").setAttribute("x", "" + (this.model.cen.x - ((targetsize / this.model.birdsEye.boxscale) * 0.5)));
-        // document.getElementById("SVGPOSASSET").setAttribute("y", "" + (SVGtruminy - (this.model.cen.y + ((targetsize / this.model.birdsEye.boxscale) * 0.5))));
+        // document.getElementById("SVGPOSASSET").setAttribute("x", "" + (this.model!.cen.x - ((targetsize / this.model!.birdsEye.boxScale) * 0.5)));
+        // document.getElementById("SVGPOSASSET").setAttribute("y", "" + (SVGtruminy - (this.model!.cen.y + ((targetsize / this.model!.birdsEye.boxScale) * 0.5))));
         // if (this.nav.targetLock) {
         //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlock.png');
         // } else {
         //     document.getElementById("SVGPOSASSET").setAttribute('href', 'images/ICON_navmode_targetlockoff.png');
         // }
-        // document.getElementById("SVGPOSASSET").setAttribute("width", "" + targetsize / this.model.birdsEye.boxscale);
-        // document.getElementById("SVGPOSASSET").setAttribute("height", "" + targetsize / this.model.birdsEye.boxscale);
+        // document.getElementById("SVGPOSASSET").setAttribute("width", "" + targetsize / this.model!.birdsEye.boxScale);
+        // document.getElementById("SVGPOSASSET").setAttribute("height", "" + targetsize / this.model!.birdsEye.boxScale);
 
         //this.GUI_refreshSVGcampos();
     } catch (err) {
@@ -1848,8 +1864,8 @@ setObserverHeight(height: number) {
     this.viewer.scene.camera.eye = [this.viewer.scene.camera.eye[0] + (eyeoffset_x * 0.5), this.viewer.scene.camera.eye[1] + (eyeoffset_y * 0.5), this.viewer.scene.camera.eye[2]]
 
 
-    //this.viewer.scene.camera.look = [this.model.cen.x * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres];
-    //this.viewer.scene.camera.eye = [(this.model.min.x - 6000) * this.model.scaleres, (this.model.min.y - 6000) * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+    //this.viewer.scene.camera.look = [this.model!.cen.x * this.model!.scaleRes, this.model!.cen.y * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes];
+    //this.viewer.scene.camera.eye = [(this.model!.min.x - 6000) * this.model!.scaleRes, (this.model!.min.y - 6000) * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes];
 
 
 },
@@ -1862,8 +1878,8 @@ setObserverHeight(height: number) {
     this.viewer.scene.camera.eye = [this.viewer.scene.camera.eye[0] - (eyeoffset_x * 1), this.viewer.scene.camera.eye[1] - (eyeoffset_y * 1), this.viewer.scene.camera.eye[2]]
 
 
-    //this.viewer.scene.camera.look = [this.model.cen.x * this.model.scaleres, this.model.cen.y * this.model.scaleres, this.model.cen.z * this.model.scaleres];
-    //this.viewer.scene.camera.eye = [(this.model.min.x - 6000) * this.model.scaleres, (this.model.min.y - 6000) * this.model.scaleres, this.model.cen.z * this.model.scaleres];
+    //this.viewer.scene.camera.look = [this.model!.cen.x * this.model!.scaleRes, this.model!.cen.y * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes];
+    //this.viewer.scene.camera.eye = [(this.model!.min.x - 6000) * this.model!.scaleRes, (this.model!.min.y - 6000) * this.model!.scaleRes, this.model!.cen.z * this.model!.scaleRes];
 
 
 },
@@ -2019,22 +2035,22 @@ GUI_actionGOTO(targetID: string) {
 
 GUI_movesectionplaneCD() {//Lower ceiling section plane 1m.
     const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Ceiling"];
-    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model.scaleres)];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model!.scaleRes)];
     //mySectionPlane2.dir = [0.4, 0.0, 0.5];
 },
 GUI_movesectionplaneCU() {//Raise ceiling section plane 1m.
     const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Ceiling"];
-    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model.scaleres)];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model!.scaleRes)];
     //mySectionPlane2.dir = [0.4, 0.0, 0.5];
 },
 GUI_movesectionplaneFD() {//Lower floor section plane 1m.
     const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Floor"];
-    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model.scaleres)];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] - (500 * this.model!.scaleRes)];
     //mySectionPlane2.dir = [0.4, 0.0, 0.5];
 },
 GUI_movesectionplaneFU() {//Raise floor section plane 1m.
     const mySectionPlane2 = this.sectionPlanes.sectionPlanes["Floor"];
-    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model.scaleres)];
+    mySectionPlane2.pos = [mySectionPlane2.pos[0], mySectionPlane2.pos[1], mySectionPlane2.pos[2] + (500 * this.model!.scaleRes)];
     //mySectionPlane2.dir = [0.4, 0.0, 0.5];
 },
 

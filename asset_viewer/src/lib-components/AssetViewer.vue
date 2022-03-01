@@ -16,6 +16,13 @@ import { defineComponent, ref } from 'vue'
 import AssetViewToolbar from './AssetViewToolbar.vue';
 import AssetDBClient from './AssetDBConnector';
 
+import { ModelType } from '../interfaces/ModelInterfaces'
+
+interface ViewData {
+    currentNavMode: String,
+    model: ModelType|null
+}
+
 export default defineComponent( {
     props: {
         bimId: String,
@@ -26,10 +33,10 @@ export default defineComponent( {
         'asset-view-toolbar': AssetViewToolbar,
         'asset-view': AssetView
     },
-    data() {
+    data():ViewData {
       return {
         currentNavMode: "Orbit",
-        model: null
+        model: null       
       };
     },
     async mounted() {
@@ -38,13 +45,19 @@ export default defineComponent( {
         console.log(this.scope);
         console.log(this.client);
 
-        this.model = await this.client?.fetchModel(this.bimId ?? "", this.scope ?? "Building");
+        if( this.bimId != null && this.bimId != "" ) {
+            this.model = await this.client?.fetchModel(this.bimId, this.scope ?? "Building");
+        }
         
     },
-    updated() {
+    async updated() {
          console.log("..Updated");
         console.log(this.bimId);
         console.log(this.client);
+
+         if( this.bimId != null && this.bimId != "" ) {
+            this.model = await this.client?.fetchModel(this.bimId, this.scope ?? "Building");
+        }
     },
     methods: {
         modeChanged(newMode) {
