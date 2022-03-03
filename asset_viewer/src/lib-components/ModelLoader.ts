@@ -13,7 +13,7 @@ import {
     math,
     XKTLoaderPlugin,
   } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
-import AssetDBClient from "./AssetDBConnector";
+import AssetDBClient from "./AssetDBClient";
 
 
 /*
@@ -64,6 +64,8 @@ export default class ModelLoader {
   
       for (i = 1; i <= max; i++) {
   
+        console.log("LOAD XKT URL " + this.model.xktUrl );
+
     this.modelparts.push("");
         //var navPart = document.getElementById("navPARTS" + i) as HTMLInputElement;
        // if (navPart.checked) {

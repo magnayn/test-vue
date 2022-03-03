@@ -467,7 +467,7 @@ import {
 
 
 import ModelLoader from './ModelLoader';
-import AssetDBClient from "./AssetDBConnector";
+import AssetDBClient from "./AssetDBClient";
 import { ModelType } from "../interfaces/ModelInterfaces";
 
 //function AJstatechgVIEWER(){ if(xhr.readyState==4){  if(xhr.status==200){viewer_ajaxresults(xhr.responseText);  } }}

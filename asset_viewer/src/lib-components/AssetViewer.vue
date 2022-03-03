@@ -1,12 +1,25 @@
 <template>
-<div>
+<div class="viewer">
   
-<asset-view-toolbar navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged" :model="model"></asset-view-toolbar>
- <asset-view ref="assetView" v-bind:model="model" :navMode="currentNavMode"></asset-view>  
+<asset-view-toolbar class="toolbar" navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged" :model="model"></asset-view-toolbar>
+<asset-view class="mainView" ref="assetView" v-bind:model="model" :navMode="currentNavMode"></asset-view>  
 
 </div>
 </template>
 <style scoped>
+
+.viewer {
+    background-color: red;
+}
+
+.toolbar {
+    background-color: green;
+}
+
+.mainView {
+    background-color: blue;
+}
+
 </style>
 
 <script lang="ts">
@@ -14,17 +27,18 @@
 import AssetView from './AssetView.vue';
 import { defineComponent, ref } from 'vue'
 import AssetViewToolbar from './AssetViewToolbar.vue';
-import AssetDBClient from './AssetDBConnector';
+import AssetDBClient from './AssetDBClient';
 
 import { ModelType } from '../interfaces/ModelInterfaces'
 
 interface ViewData {
     currentNavMode: String,
-    model: ModelType|null
+    model: ModelType|undefined|null
 }
 
 export default defineComponent( {
     props: {
+        xkt: String,
         bimId: String,
         scope: String,
         client: AssetDBClient
@@ -45,7 +59,9 @@ export default defineComponent( {
         console.log(this.scope);
         console.log(this.client);
 
-        if( this.bimId != null && this.bimId != "" ) {
+        if( this.xkt != null ) {
+            this.model = await this.client?.fetchXkt(this.xkt);
+        } else if( this.bimId != null && this.bimId != "" ) {
             this.model = await this.client?.fetchModel(this.bimId, this.scope ?? "Building");
         }
         
