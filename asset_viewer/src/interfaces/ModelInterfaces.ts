@@ -13,7 +13,7 @@ export interface Coordinate {
     boxScale: number
   }
   
-  export interface ModelType {
+  export interface ModelInfo {
     assetDBClient:any;
     
     id: String,
@@ -37,3 +37,5 @@ export interface Coordinate {
   
     birdsEye: BirdsEye
   }
+
+

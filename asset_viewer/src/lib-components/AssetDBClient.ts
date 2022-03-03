@@ -1,4 +1,4 @@
-import { ModelType, Coordinate } from "@/interfaces/ModelInterfaces";
+import { ModelInfo, Coordinate } from "@/interfaces/ModelInterfaces";
 
 export interface AssetDBClientOptions {
     baseUrl: string;
@@ -14,7 +14,7 @@ export default class AssetDBClient {
         this.options = options
     }
 
-    async fetchModel(id: string, scope: string):Promise<ModelType> {
+    async fetchModel(id: string, scope: string):Promise<ModelInfo> {
 
         const requestHeaders = new Headers({
             'Authorization': this.options.token ? `Bearer ${this.options.token}` : "",
@@ -32,10 +32,10 @@ export default class AssetDBClient {
         return data;
     }
 
-    async fetchXkt(xkt: string):Promise<ModelType>{
+    async fetchXkt(xkt: string):Promise<ModelInfo>{
         console.log("FetchXKT " + xkt);
-        
-        var data:ModelType = {
+
+        var data:ModelInfo = {
             assetDBClient: undefined,
             id: "",
             modelId: "",

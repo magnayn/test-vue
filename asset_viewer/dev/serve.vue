@@ -31,10 +31,14 @@ export default defineComponent({
 
 </script>
 
+<style scoped>
+
+</style>
+
 <template>
-  <div id="app">
+
     
      <asset-viewer :xkt="xkt" :client="client"></asset-viewer>
 
-  </div>
+
 </template>

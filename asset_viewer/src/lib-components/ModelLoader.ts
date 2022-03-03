@@ -1,4 +1,4 @@
-import { ModelType } from "@/interfaces/ModelInterfaces";
+import { ModelInfo } from "@/interfaces/ModelInterfaces";
 import {
     Viewer,
     SectionPlanesPlugin,
@@ -11,6 +11,7 @@ import {
     ObjectsMemento,
     CameraMemento,
     math,
+    Entity,
     XKTLoaderPlugin,
   } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 import AssetDBClient from "./AssetDBClient";
@@ -35,18 +36,22 @@ import AssetDBClient from "./AssetDBClient";
 
 
 
+
 export default class ModelLoader {
 
-    constructor(viewer, model) {
+    constructor(viewer:Viewer, model) {
       this.xktLoader = new XKTLoaderPlugin(viewer);
       this.model = model;
+      this.viewer = viewer;
     }
   
-    modelparts: any[] = [];
+    viewer:Viewer;
+
+    modelparts: Entity[] = [];
     modelrooms: any[] = [];
     xktLoader: any;
   
-    model: ModelType;
+    model: ModelInfo;
   
     get assetDBClient():AssetDBClient {
         return this.model.assetDBClient;
@@ -58,20 +63,14 @@ export default class ModelLoader {
       var max: number = this.model.partsCount;
       var i: number;
   
-      // DEBUG
-      //this.model.xktUrl = "http://localhost:57914/api/v1/asset/xkt/DL1.xkt";
-      
+ 
   
       for (i = 1; i <= max; i++) {
-  
-        console.log("LOAD XKT URL " + this.model.xktUrl );
 
     this.modelparts.push("");
-        //var navPart = document.getElementById("navPARTS" + i) as HTMLInputElement;
-       // if (navPart.checked) {
-          //alert('load model' + "./XKTFiles/REQ-" + this.model.xktreq + ".xkt");
+       
           modelinitialIndex = i - 1;
-          this.modelparts[modelinitialIndex] = this.xktLoader.load({
+          var entity = this.xktLoader.load({
             id: "myModel" + i,
             src: this.model.xktUrl,
             edges: true,
@@ -131,8 +130,15 @@ export default class ModelLoader {
       }
   
   
+      this.modelparts[modelinitialIndex] = entity;
+
+      console.log("Part Loaded");
+      console.log(entity);
+
       this.modelparts[modelinitialIndex].on("loaded", callback);
-  
+      
+      
+
     }
   
     loadPart(partIndex, name) {

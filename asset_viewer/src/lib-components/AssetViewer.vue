@@ -1,23 +1,33 @@
 <template>
 <div class="viewer">
-  
-<asset-view-toolbar class="toolbar" navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged" :model="model"></asset-view-toolbar>
-<asset-view class="mainView" ref="assetView" v-bind:model="model" :navMode="currentNavMode"></asset-view>  
-
+    <asset-view-toolbar class="toolbar" navMode="Orbit" @navModeChange="modeChanged" @changeHeight="heightChanged" :model="model"></asset-view-toolbar>
+    <asset-view class="mainView" ref="assetView" v-bind:model="model" :navMode="currentNavMode"></asset-view>  
+    
+    <div class="footer">  </div>
 </div>
 </template>
 <style scoped>
 
 .viewer {
-    background-color: red;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
 }
 
 .toolbar {
     background-color: green;
+    z-index: 1;
 }
 
 .mainView {
-    background-color: blue;
+
+    flex-grow: 1;
+}
+
+.footer {
+  background: #9984D4;
 }
 
 </style>
@@ -29,11 +39,11 @@ import { defineComponent, ref } from 'vue'
 import AssetViewToolbar from './AssetViewToolbar.vue';
 import AssetDBClient from './AssetDBClient';
 
-import { ModelType } from '../interfaces/ModelInterfaces'
+import { ModelInfo } from '../interfaces/ModelInterfaces'
 
 interface ViewData {
     currentNavMode: String,
-    model: ModelType|undefined|null
+    model: ModelInfo|undefined|null
 }
 
 export default defineComponent( {
