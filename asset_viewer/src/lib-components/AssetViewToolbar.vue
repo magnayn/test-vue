@@ -1,64 +1,205 @@
 <template>
+<div id="floorList">
+<li v-for="item in floorList" :key="item.id">
+    {{ item.name }}
+  </li>
+</div>
+  <toolbar>
 
 
-<toolbar>
 
-<toolbar-button ID="navmodeELEV" location="left" widget="dxButton" :options="navmodeELEV"  />
-  <toolbar-button id="actionPARTS" location="left" widget="dxButton" :options="actionPARTS"  />
-  <toolbar-button id="actionDETAILS" location="left" widget="dxButton" :options="actionDETAILS"  />
+    <toolbar-button
+      ID="navmodeELEV"
+      location="left"
+      widget="dxButton"
+      :options="navmodeELEV"
+    />
+    <toolbar-button
+      id="actionPARTS"
+      location="left"
+      widget="dxButton"
+      :options="actionPARTS"
+    />
+    <toolbar-button
+      id="actionDETAILS"
+      location="left"
+      widget="dxButton"
+      :options="actionDETAILS"
+    />
 
-  <toolbar-button ID="actionGOTO" location="center" widget="dxButton" :options="actionGOTO" />
+    <toolbar-button
+      ID="actionGOTO"
+      location="center"
+      widget="dxButton"
+      :options="actionGOTO"
+    />
 
-<!--
+    <!--
 onclick="GUI_togglecutplane()"
 -->
- <toolbar-button ID="flrcpTOGGLE" location="center" widget="dxButton" :options="flrcpTOGGLE"  />
-  <toolbar-button ID="onclickSLICE" location="center" widget="dxButton" :options="onclickSLICE" />
-  <toolbar-button ID="onclickSELECT" location="center" widget="dxButton" :options="onclickSELECT" />
-  <toolbar-button ID="onclickMEASURE" location="center" widget="dxButton" :options="onclickMEASURE" />
-  <toolbar-button ID="onclickGOTO" location="center" widget="dxButton" :options="onclickGOTO" />
-        
-        
-    <toolbar-button id="navmodeTARGETLOCK"  widget="dxButton" :options="modeTargetLockOptions"  location="center" />
+    <toolbar-button
+      ID="flrcpTOGGLE"
+      location="center"
+      widget="dxButton"
+      :options="flrcpTOGGLE"
+    />
+    <toolbar-button
+      ID="onclickSLICE"
+      location="center"
+      widget="dxButton"
+      :options="onclickSLICE"
+    />
+    <toolbar-button
+      ID="onclickSELECT"
+      location="center"
+      widget="dxButton"
+      :options="onclickSELECT"
+    />
+    <toolbar-button
+      ID="onclickMEASURE"
+      location="center"
+      widget="dxButton"
+      :options="onclickMEASURE"
+    />
+    <toolbar-button
+      ID="onclickGOTO"
+      location="center"
+      widget="dxButton"
+      :options="onclickGOTO"
+    />
 
-    <toolbar-button ID="navmodeFPV"      widget="dxButton"   :options="modeFPVOptions" location="center"   />
+    <toolbar-button
+      id="navmodeTARGETLOCK"
+      widget="dxButton"
+      :options="modeTargetLockOptions"
+      location="center"
+    />
 
-    <toolbar-button ID="navmodeDRONE"  widget="dxButton" :options="modeDroneOptions" location="center"  />
+    <toolbar-button
+      ID="navmodeFPV"
+      widget="dxButton"
+      :options="modeFPVOptions"
+      location="center"
+    />
 
-    <toolbar-button ID="navmodeORBIT"  widget="dxButton" :options="modeOrbitOptions" location="center"  />
+    <toolbar-button
+      ID="navmodeDRONE"
+      widget="dxButton"
+      :options="modeDroneOptions"
+      location="center"
+    />
 
+    <toolbar-button
+      ID="navmodeORBIT"
+      widget="dxButton"
+      :options="modeOrbitOptions"
+      location="center"
+    />
 
     <!-- <div ID="navmodeFPVsub" > -->
-      <toolbar-button ID="navmodeFPVHGT00" widget="dxButton" :options="navHeight0"  location="center"/>
-      <toolbar-button ID="navmodeFPVHGT01" widget="dxButton" :options="navHeight1"   location="center"/>
-      <toolbar-button ID="navmodeFPVHGT02" widget="dxButton" :options="navHeight2" location="center" />
-      <toolbar-button ID="navmodeFPVHGT03" widget="dxButton" :options="navHeight3" location="center"/>
+    <toolbar-button
+      ID="navmodeFPVHGT00"
+      widget="dxButton"
+      :options="navHeight0"
+      location="center"
+    />
+    <toolbar-button
+      ID="navmodeFPVHGT01"
+      widget="dxButton"
+      :options="navHeight1"
+      location="center"
+    />
+    <toolbar-button
+      ID="navmodeFPVHGT02"
+      widget="dxButton"
+      :options="navHeight2"
+      location="center"
+    />
+    <toolbar-button
+      ID="navmodeFPVHGT03"
+      widget="dxButton"
+      :options="navHeight3"
+      location="center"
+    />
     <!-- </div> -->
-        
+
     <!-- <div ID="navmodeORBITsub" > -->
-      <toolbar-button ID="navmodeORBITmoveout" widget="dxButton" :options="navmodeORBITmoveout"  location="center" ></toolbar-button>
-      <toolbar-button ID="navmodeORBITmovein" widget="dxButton" :options="navmodeORBITmovein"  location="center" ></toolbar-button>
-      <toolbar-button ID="navmodeORBITrotccw" widget="dxButton" :options="navmodeORBITrotccw"  location="center" ></toolbar-button>
-      <toolbar-button ID="navmodeORBITrotcw" widget="dxButton" :options="navmodeORBITrotcw"  location="center" ></toolbar-button>
+    <toolbar-button
+      ID="navmodeORBITmoveout"
+      widget="dxButton"
+      :options="navmodeORBITmoveout"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="navmodeORBITmovein"
+      widget="dxButton"
+      :options="navmodeORBITmovein"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="navmodeORBITrotccw"
+      widget="dxButton"
+      :options="navmodeORBITrotccw"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="navmodeORBITrotcw"
+      widget="dxButton"
+      :options="navmodeORBITrotcw"
+      location="center"
+    ></toolbar-button>
     <!-- </div> -->
 
     <!-- <div ID="navmodeCUTPsub" > -->
-      <toolbar-button ID="flrcpCD" widget="dxButton" :options="flrcpCD" location="center" ></toolbar-button>
-      <toolbar-button ID="flrcpCU" widget="dxButton" :options="flrcpCU" location="center" ></toolbar-button>
-      <toolbar-button ID="flrcpFD" widget="dxButton" :options="flrcpFD" location="center" ></toolbar-button>
-      <toolbar-button ID="flrcpFU" widget="dxButton" :options="flrcpFU" location="center" ></toolbar-button>
+    <toolbar-button
+      ID="flrcpCD"
+      widget="dxButton"
+      :options="flrcpCD"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="flrcpCU"
+      widget="dxButton"
+      :options="flrcpCU"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="flrcpFD"
+      widget="dxButton"
+      :options="flrcpFD"
+      location="center"
+    ></toolbar-button>
+    <toolbar-button
+      ID="flrcpFU"
+      widget="dxButton"
+      :options="flrcpFU"
+      location="center"
+    ></toolbar-button>
     <!-- </div> -->
 
-<!-- <div ><select id="navROOMLST" >
+    <!-- <div ><select id="navROOMLST" >
   <option value="NOROOM">Rooms</option><option value="0">FIRST-1</option><option value="0">FIRST-10</option><option value="0">FIRST-11</option><option value="0">FIRST-12</option><option value="0">FIRST-13</option><option value="0">FIRST-14</option><option value="0">FIRST-2</option><option value="0">FIRST-21</option><option value="0">FIRST-22</option><option value="0">FIRST-23</option><option value="0">FIRST-24</option><option value="0">FIRST-25</option><option value="0">FIRST-26</option><option value="0">FIRST-27</option><option value="0">FIRST-28</option><option value="0">FIRST-29</option><option value="0">FIRST-3</option><option value="0">FIRST-30</option><option value="0">FIRST-4</option><option value="0">FIRST-5</option><option value="0">FIRST-6</option><option value="0">FIRST-7</option><option value="0">FIRST-8</option><option value="0">FIRST-9</option><option value="0">GROUND-1</option><option value="0">GROUND-15</option><option value="0">GROUND-16</option><option value="0">GROUND-17</option><option value="0">GROUND-18</option><option value="0">GROUND-19</option><option value="0">GROUND-2</option><option value="0">GROUND-20</option><option value="0">GROUND-R3</option></select>
 </div>  -->
 
-   <toolbar-button id="rooms"  location="after"  widget="dxSelectBox" :options="listRooms" />  
-<toolbar-button id="navmodePLAN" location="after"  widget="dxButton" :options="navmodePLAN"/>
- <toolbar-button id="actionGOTOroom" location="after"  widget="dxButton" :options="actionGOTOroom" />
-
-
-</toolbar>
+    <toolbar-button
+      id="rooms"
+      location="after"
+      widget="dxSelectBox"
+      :options="listRooms"
+    />
+    <toolbar-button
+      id="navmodePLAN"
+      location="after"
+      widget="dxButton"
+      :options="navmodePLAN"
+    />
+    <toolbar-button
+      id="actionGOTOroom"
+      location="after"
+      widget="dxButton"
+      :options="actionGOTOroom"
+    />
+  </toolbar>
 </template>
 <style scoped>
 .toolbar-label,
@@ -82,11 +223,34 @@ import { defineComponent } from "vue";
 
 import { ModelInfo } from "../interfaces/ModelInterfaces";
 
-/*
-export enum NavMode{
-  Orbit
-};
-*/
+import ICON_details from "../assets/IMAGES/ICON_details.png";
+import ICON_navmode_elevview from "../assets/IMAGES/ICON_navmode_elevview.png";
+
+import ICON_parts from "../assets/IMAGES/ICON_parts.png";
+import ICON_goto from "../assets/IMAGES/ICON_goto.png";
+import ICON_flrcp_on from "../assets/IMAGES/ICON_flrcp_on.png";
+import ICON_onclick_slice from "../assets/IMAGES/ICON_onclick_slice.png";
+import ICON_onclick_select from "../assets/IMAGES/ICON_onclick_select.png";
+import ICON_onclick_measure from "../assets/IMAGES/ICON_onclick_measure.png";
+import ICON_onclick_goto from "../assets/IMAGES/ICON_onclick_goto.png";
+import ICON_flrcp_ceil_down from "../assets/IMAGES/ICON_flrcp_ceil_down.png";
+import ICON_flrcp_ceil_up from "../assets/IMAGES/ICON_flrcp_ceil_up.png";
+import ICON_flrcp_floor_down from "../assets/IMAGES/ICON_flrcp_floor_down.png";
+import ICON_flrcp_floor_up from "../assets/IMAGES/ICON_flrcp_floor_up.png";
+import ICON_navmode_planview from "../assets/IMAGES/ICON_navmode_planview.png";
+import ICON_navmode_targetlock from "../assets/IMAGES/ICON_navmode_targetlock.png";
+import ICON_navmode_fpv from "../assets/IMAGES/ICON_navmode_fpv.png";
+import ICON_navmode_drone from "../assets/IMAGES/ICON_navmode_drone.png";
+import ICON_navmode_orbit from "../assets/IMAGES/ICON_navmode_orbit.png";
+import ICON_HGT_FPV_00 from "../assets/IMAGES/ICON_HGT_FPV_00.png";
+import ICON_HGT_FPV_01 from "../assets/IMAGES/ICON_HGT_FPV_01.png";
+import ICON_HGT_FPV_02 from "../assets/IMAGES/ICON_HGT_FPV_02.png";
+import ICON_HGT_FPV_03 from "../assets/IMAGES/ICON_HGT_FPV_03.png";
+
+import ICON_orbit_move_away from "../assets/IMAGES/ICON_orbit_move_away.png";
+import ICON_orbit_move_toward from "../assets/IMAGES/ICON_orbit_move_toward.png";
+import ICON_orbit_rotate_ccw from "../assets/IMAGES/ICON_orbit_rotate_ccw.png";
+import ICON_orbit_rotate_cw from "../assets/IMAGES/ICON_orbit_rotate_cw.png";
 
 export default defineComponent({
   props: {
@@ -95,19 +259,19 @@ export default defineComponent({
       type: Object as () => ModelInfo | null,
     },
   },
-  components: {ToolbarButton, Toolbar},
+  components: { ToolbarButton, Toolbar },
   updated() {
-    console.log("TB UPDATE");
     console.log(this.model);
   },
   data() {
     return {
       currentNavMode: this.navMode,
+      floorList: this.model?.floorList,
       refreshButtonOptions: {
         icon: "refresh",
         onClick: () => {
           console.log("Refresh button has been clicked!");
-        },
+        }, 
       },
       fooOptions: {
         text: "foofoo",
@@ -115,48 +279,48 @@ export default defineComponent({
 
       //
       navmodeELEV: {
-        icon: "IMAGES/ICON_navmode_elevview.png",
+        icon: ICON_navmode_elevview,
         hint: "Elevation",
         onClick: () => {},
       },
       actionPARTS: {
-        icon: "IMAGES/ICON_parts.png",
+        icon: ICON_parts,
         hint: "Parts",
         onClick: () => {},
       },
       actionDETAILS: {
-        icon: "IMAGES/ICON_details.png",
+        icon: ICON_details,
         hint: "Details",
         onClick: () => {},
       },
       actionGOTO: {
-        icon: "IMAGES/ICON_goto.png",
+        icon: ICON_goto,
         hint: "Go To",
         onClick: () => {},
       },
 
       flrcpTOGGLE: {
-        icon: "IMAGES/ICON_flrcp_on.png",
+        icon: ICON_flrcp_on,
         hint: "Toggle Cut-Plane",
         onClick: () => {},
       },
       onclickSLICE: {
-        icon: "IMAGES/ICON_onclick_slice.png",
+        icon: ICON_onclick_slice,
         hint: "Slice",
         onClick: () => {},
       },
       onclickSELECT: {
-        icon: "IMAGES/ICON_onclick_select.png",
+        icon: ICON_onclick_select,
         hint: "select",
         onClick: () => {},
       },
       onclickMEASURE: {
-        icon: "IMAGES/ICON_onclick_measure.png",
+        icon: ICON_onclick_measure,
         hint: "Measure",
         onClick: () => {},
       },
       onclickGOTO: {
-        icon: "IMAGES/ICON_onclick_goto.png",
+        icon: ICON_onclick_goto,
         hint: "Go To",
         onClick: () => {},
       },
@@ -165,22 +329,22 @@ export default defineComponent({
 
       // Cut plane
       flrcpCD: {
-        icon: "IMAGES/ICON_flrcp_ceil_down.png",
+        icon: ICON_flrcp_ceil_down,
         hint: "Cut Plane: Ceiling Down",
         onClick: () => {},
       },
       flrcpCU: {
-        icon: "IMAGES/ICON_flrcp_ceil_up.png",
+        icon: ICON_flrcp_ceil_up,
         hint: "Cut Plane: Ceiling Up",
         onClick: () => {},
       },
       flrcpFD: {
-        icon: "IMAGES/ICON_flrcp_floor_down.png",
+        icon: ICON_flrcp_floor_down,
         hint: "Cut Plane: Floor Down",
         onClick: () => {},
       },
       flrcpFU: {
-        icon: "IMAGES/ICON_flrcp_floor_up.png",
+        icon: ICON_flrcp_floor_up,
         hint: "Cut Plane: Floor Up",
         onClick: () => {},
       },
@@ -188,13 +352,13 @@ export default defineComponent({
       //
 
       navmodePLAN: {
-        icon: "IMAGES/ICON_navmode_planview.png",
+        icon: ICON_navmode_planview,
         hint: "Nav mode plan",
         onClick: () => {},
       },
 
       actionGOTOroom: {
-        icon: "IMAGES/ICON_goto.png",
+        icon: ICON_goto,
         hint: "Goto room",
         onClick: () => {},
       },
@@ -211,7 +375,7 @@ export default defineComponent({
   computed: {
     modeTargetLockOptions() {
       return {
-        icon: "IMAGES/ICON_navmode_targetlock.png",
+        icon: ICON_navmode_targetlock,
         hint: "Target Lock",
         type: this.currentNavMode == "TargetLock" ? "default" : "outlined",
         onClick: () => {
@@ -221,7 +385,7 @@ export default defineComponent({
     },
     modeFPVOptions() {
       return {
-        icon: "IMAGES/ICON_navmode_fpv.png",
+        icon: ICON_navmode_fpv,
         hint: "FPV",
         type: this.currentNavMode == "FPV" ? "default" : "outlined",
         onClick: () => {
@@ -231,7 +395,7 @@ export default defineComponent({
     },
     modeDroneOptions() {
       return {
-        icon: "IMAGES/ICON_navmode_drone.png",
+        icon: ICON_navmode_drone,
         hint: "Drone",
         type: this.currentNavMode == "Drone" ? "default" : "outlined",
         onClick: () => {
@@ -241,7 +405,7 @@ export default defineComponent({
     },
     modeOrbitOptions() {
       return {
-        icon: "IMAGES/ICON_navmode_orbit.png",
+        icon: ICON_navmode_orbit,
         hint: "Orbit",
         type: this.currentNavMode == "Orbit" ? "default" : "outlined",
         onClick: () => {
@@ -253,7 +417,7 @@ export default defineComponent({
     // FPV
     navHeight0() {
       return {
-        icon: "IMAGES/ICON_HGT_FPV_00.png",
+        icon: ICON_HGT_FPV_00,
         hint: "Prone",
         visible: this.currentNavMode == "FPV",
         onClick: () => {
@@ -263,7 +427,7 @@ export default defineComponent({
     },
     navHeight1() {
       return {
-        icon: "IMAGES/ICON_HGT_FPV_01.png",
+        icon: ICON_HGT_FPV_01,
         hint: "Kneel",
         visible: this.currentNavMode == "FPV",
         onClick: () => {
@@ -273,7 +437,7 @@ export default defineComponent({
     },
     navHeight2() {
       return {
-        icon: "IMAGES/ICON_HGT_FPV_02.png",
+        icon: ICON_HGT_FPV_02,
         hint: "Stand",
         visible: this.currentNavMode == "FPV",
         onClick: () => {
@@ -283,7 +447,7 @@ export default defineComponent({
     },
     navHeight3() {
       return {
-        icon: "IMAGES/ICON_HGT_FPV_03.png",
+        icon: ICON_HGT_FPV_03,
         hint: "Steps",
         visible: this.currentNavMode == "FPV",
         onClick: () => {
@@ -295,7 +459,7 @@ export default defineComponent({
     // Orbit
     navmodeORBITmoveout() {
       return {
-        icon: "IMAGES/ICON_orbit_move_away.png",
+        icon: ICON_orbit_move_away,
         visible: this.currentNavMode == "Orbit",
         hint: "Move Away",
         onClick: () => {},
@@ -303,7 +467,7 @@ export default defineComponent({
     },
     navmodeORBITmovein() {
       return {
-        icon: "IMAGES/ICON_orbit_move_toward.png",
+        icon: ICON_orbit_move_toward,
         visible: this.currentNavMode == "Orbit",
         hint: "Move Toward",
         onClick: () => {},
@@ -311,7 +475,7 @@ export default defineComponent({
     },
     navmodeORBITrotccw() {
       return {
-        icon: "IMAGES/ICON_orbit_rotate_ccw.png",
+        icon: ICON_orbit_rotate_ccw,
         visible: this.currentNavMode == "Orbit",
         hint: "Rotate Counter-Clockwise",
         onClick: () => {},
@@ -319,7 +483,7 @@ export default defineComponent({
     },
     navmodeORBITrotcw() {
       return {
-        icon: "IMAGES/ICON_orbit_rotate_cw.png",
+        icon: ICON_orbit_rotate_cw,
         visible: this.currentNavMode == "Orbit",
         hint: "Rotate Clockwise",
         onClick: () => {},
@@ -350,47 +514,4 @@ export default defineComponent({
     changeHeight(height: number) {},
   },
 });
-
-function SetupGUI() {
-  // //Define control actions
-  // document.getElementById("actionDETAILS").onclick = GUI_actionDETAILS;
-  // document.getElementById("actionPARTS").onclick = GUI_actionPARTS;
-  // document.getElementById("actionGOTO").onclick = GUI_actionGOTO;
-  // document.getElementById("flrcpTOGGLE").onclick = self.GUI_togglecutplane;
-  // document.getElementById("flrcpCD").onclick = GUI_movesectionplaneCD;
-  // document.getElementById("flrcpCU").onclick = GUI_movesectionplaneCU;
-  // document.getElementById("flrcpFD").onclick = GUI_movesectionplaneFD;
-  // document.getElementById("flrcpFU").onclick = GUI_movesectionplaneFU;
-  // document.getElementById("onclickSELECT").onclick = GUI_onclickSELECT;
-  // document.getElementById("onclickMEASURE").onclick = GUI_onclickMEASURE;
-  // document.getElementById("onclickGOTO").onclick = GUI_onclickGOTO;
-  // document.getElementById("navmodeTARGETLOCK").onclick = GUI_navmodeTARGETLOCK;
-  // document.getElementById("navmodeFPV").onclick = self.GUI_navmodeFPV;
-  // document.getElementById("navmodeDRONE").onclick = self.GUI_navmodeDRONE;
-  // document.getElementById("navmodeORBIT").onclick = self.GUI_navmodeORBIT;
-  // document.getElementById("navmodePLAN").onclick = GUI_actionPLAN; //GUI_refreshSVGcampos;
-  // document.getElementById("navmodeELEV").onclick = GUI_actionELEV; //GUI_refreshSVGcampos;
-  // //document.getElementById("navFLRLST").onchange = GUI_navFLRLST;
-  // //document.getElementById("navROOMLST").onchange = GUI_navROOMLOAD;
-  // document.getElementById("navmodeORBITmoveout").onclick = GUI_navmodeORBITmoveout;
-  // document.getElementById("navmodeORBITmovein").onclick = GUI_navmodeORBITmovein;
-  // document.getElementById("navmodeORBITrotccw").onclick = GUI_navmodeORBITrotccw;
-  // document.getElementById("navmodeORBITrotcw").onclick = GUI_navmodeORBITrotcw;
-  // document.getElementById("navmodeFPVHGT00").onclick = GUI_navmodeFPVsethgt;
-  // document.getElementById("navmodeFPVHGT01").onclick = GUI_navmodeFPVsethgt;
-  // document.getElementById("navmodeFPVHGT02").onclick = GUI_navmodeFPVsethgt;
-  // document.getElementById("navmodeFPVHGT03").onclick = GUI_navmodeFPVsethgt;
-  // document.getElementById("actionGOTOroom").onclick = GUI_actionGOTOroom;
-  // //document.getElementById("actionPARTSroom").onclick = GUI_actionPARTSroom; // GUI_navROOMLOAD;
-  // document.getElementById("navBIRDSEYEmagFit").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx2").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx4").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx8").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx16").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx32").onclick = GUI_BIRDSEYEmag;
-  // document.getElementById("navBIRDSEYEmagx64").onclick = GUI_BIRDSEYEmag;
-  // //svg_doc.onclick = GUI_setSVGcampos;
-  // document.getElementById('navBIRDSEYEdiv').onclick = GUI_setSVGcampos;
-  // document.getElementById('navELEVATIONgraphic').onclick = self.GUI_navFLRLST;
-}
 </script>

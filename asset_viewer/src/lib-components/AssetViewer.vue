@@ -18,7 +18,7 @@
 
 .toolbar {
     background-color: green;
-    z-index: 1;
+
 }
 
 .mainView {
@@ -28,6 +28,8 @@
 
 .footer {
   background: #9984D4;
+  min-height: 25px;
+
 }
 
 </style>

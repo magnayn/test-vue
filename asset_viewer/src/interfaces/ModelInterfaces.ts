@@ -1,3 +1,7 @@
+import {
+  MetaScene
+} from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
+
 export interface Coordinate {
     x: number,
     y: number,
@@ -14,6 +18,7 @@ export interface Coordinate {
   }
   
   export interface ModelInfo {
+    metaScene?: MetaScene;
     assetDBClient:any;
     
     id: String,

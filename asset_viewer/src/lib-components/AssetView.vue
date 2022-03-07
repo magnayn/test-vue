@@ -3,24 +3,58 @@
     <canvas id="myCanvas"></canvas>
     <canvas id="myNavCubeCanvas"></canvas>
     <canvas id="mySectionPlanesOverviewCanvas"></canvas>
+    <div id="storeyMap"></div>
   </div> 
 </template>
+<style>
+/* this currently isn't scoped as it's being added to the end of the document. It could likely be
+   either added directly to the viewer as a div or scoped there. */
+ #planPointer {
 
+            color: #000000;
+            line-height: 1.8;
+            text-align: center;
+            font-family: "monospace";
+            font-weight: bold;
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-image: url(../assets/IMAGES/storeyMapCamera.png);
+            background-repeat: no-repeat;
+            background-size: 60px 60px;
+        }
+        
+</style>
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 #myViewer {
-
+  width: 100%;
+  display: flex;
+  background: green;
 }
 
 #myCanvas {
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
+
+  flex: 1 1 auto;
+  
   background: white;
 
 }
+
+#storeyMap {
+            position: absolute;
+            left: 10px;
+            top: 60px;
+            margin-top: 20px;
+            overflow-y: hidden;
+            height: auto;
+            pointer-events: all;
+            width: auto;
+            user-select: none;
+            border: 1px solid red;
+        }
+
+       
 
 #controls {
   font-size: 13px;
@@ -98,6 +132,7 @@ import {
   WebIFCLoaderPlugin,
   ObjectsMemento,
   CameraMemento,
+  StoreyViewsPlugin,
   math,
   XKTLoaderPlugin,
 } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
@@ -124,10 +159,11 @@ class VData {
 
   cameraControl: any;
   distanceMeasurements: any;
+  storeyViewer?: SWGStoreyViewer;
   mapColor: any = new Map();
 
   // XKT data
-  loader!:ModelLoader;
+  loader?:ModelLoader;
   
   selectMode = "select";
   isFP = false;
@@ -152,6 +188,203 @@ class VData {
   itemId:string = "";
 }
 
+class SWGStoreyViewer
+{
+  modelLoader:ModelLoader;
+  storeyViewsPlugin:StoreyViewsPlugin;
+
+  constructor(modelLoader:ModelLoader) {
+    this.modelLoader = modelLoader; 
+    this.storeyViewsPlugin = new StoreyViewsPlugin(this.modelLoader.viewer);
+  }
+
+  show(id:string) {
+      const storey = this.storeyViewsPlugin.storeys[id]; // ID of the IfcBuildingStorey
+
+      const modelId  = storey.modelId;  // "myModel"
+      const storeyId = storey.storeyId; // "2SWZMQPyD9pfT9q87pgXa1"
+      const aabb     = storey.aabb;     // Axis-aligned 3D World-space boundary of the IfcBuildingStorey
+
+      this.storeyViewsPlugin.showStoreyObjects(id);
+
+      const storeyMap = this.storeyViewsPlugin.createStoreyMap(id, {
+          width: 300,
+          format: "png"
+      });
+
+      // Create the image
+        const img = document.createElement("img");
+        img.src = storeyMap.imageData;
+        img.style.width = storeyMap.width + "px";
+        img.style.height = storeyMap.height + "px";
+        img.style.padding = "0";
+        img.style.margin = "0";
+
+      // Add to the div
+        const storeyMapDiv = document.getElementById("storeyMap")!;
+        storeyMapDiv.appendChild(img);
+
+
+        const pointer = document.createElement("div");
+        pointer.id = "planPointer";
+        pointer.style.width = "60px";
+        pointer.style.height = "60px";
+        pointer.style.position = "absolute";
+        pointer.style["z-index"] = 100000;
+        pointer.style.left = "0px";
+        pointer.style.top = "0px";
+        pointer.style.cursor = "none";
+        pointer.style["pointer-events"] = "none";
+        pointer.style.transform = "rotate(0deg)";
+        pointer.style.visibility = "hidden";
+        document.body.appendChild(pointer);
+
+        const canStandOnTypes = {
+            IfcSlab: true,
+            IfcStair: true,
+            IfcFloor: true,
+            IfcFooting: true
+        };
+
+        img.onmouseenter = (e) => {
+            img.style.cursor = "default";
+        };
+
+        img.onmousemove = (e) => {
+            
+            img.style.cursor = "default";
+
+            const imagePos = [e.offsetX, e.offsetY];
+
+            const pickResult = this.storeyViewsPlugin.pickStoreyMap(storeyMap, imagePos, {});
+
+            if (pickResult) {
+
+                const entity = pickResult.entity;
+                const metaObject = this.modelLoader.viewer.metaScene.metaObjects[entity.id];
+
+                if (metaObject) {
+                    if (canStandOnTypes[metaObject.type]) {
+                        img.style.cursor = "pointer";
+                    }
+                }
+            }
+        };
+
+        img.onmouseleave = (e) => {
+            img.style.cursor = "default";
+        };
+
+        const worldPos = math.vec3();
+
+        img.onclick = (e) => {
+            const viewer = this.modelLoader.viewer;
+            const imagePos = [e.offsetX, e.offsetY];
+            const pickResult = this.storeyViewsPlugin.pickStoreyMap(storeyMap, imagePos, {
+                pickSurface: true
+            });
+            if (pickResult) {
+
+                worldPos.set(pickResult.worldPos);
+
+                // Set camera vertical position at the mid point of the storey's vertical
+                // extents - note how this is adapts to whichever of the X, Y or Z axis is
+                // designated the World's "up" axis
+
+                
+                const camera = viewer.scene.camera;
+                const idx = camera.xUp ? 0 : (camera.yUp ? 1 : 2); // Find the right axis for "up"
+                const storey = this.storeyViewsPlugin.storeys[storeyMap.storeyId];
+                worldPos[idx] = (storey.aabb[idx] + storey.aabb[3 + idx]) / 2;
+
+                viewer.cameraFlight.flyTo({
+                    eye: worldPos,
+                    up: viewer.camera.worldUp,
+                    look: math.addVec3(worldPos, viewer.camera.worldForward, []),
+                    projection: "perspective",
+                    duration: 1.5
+                }, () => {
+                    viewer.cameraControl.navMode = "firstPerson";
+                });
+            } else {
+                this.storeyViewsPlugin.gotoStoreyCamera(id, {
+                    projection: "ortho",
+                    duration: 1.5,
+                    done: () => {
+                        viewer.cameraControl.navMode = "planView"
+                    }
+                });
+            }
+        };
+
+        const imagePos = math.vec2();
+        const worldDir = math.vec3();
+        const imageDir = math.vec2();
+
+        const updatePointer = () => {
+          
+            const viewer = this.modelLoader.viewer;
+            const eye = viewer.camera.eye;
+            const storeyId = this.storeyViewsPlugin.getStoreyContainingWorldPos(eye);
+            if (!storeyId) {
+                hidePointer();
+                return;
+            }
+            const inBounds = this.storeyViewsPlugin.worldPosToStoreyMap(storeyMap, eye, imagePos);
+            if (!inBounds) {
+                hidePointer();
+                return;
+            }
+            var offset = getPosition(img);
+            imagePos[0] += offset.x;
+            imagePos[1] += offset.y;
+
+            this.storeyViewsPlugin.worldDirToStoreyMap(storeyMap, worldDir, imageDir);
+
+            showPointer(imagePos, imageDir);
+        };
+        
+        const viewer = this.modelLoader.viewer;
+        viewer.camera.on("viewMatrix", updatePointer);
+        viewer.scene.canvas.on("boundary", updatePointer);
+
+        function getPosition(el) {
+            var xPos = 0;
+            var yPos = 0;
+            while (el) {
+                if (el.tagName === "BODY") {      // deal with browser quirks with body/window/document and page scroll
+                    var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+                    var yScroll = el.scrollTop || document.documentElement.scrollTop;
+                    xPos += (el.offsetLeft - xScroll + el.clientLeft);
+                    yPos += (el.offsetTop - yScroll + el.clientTop);
+                } else {
+                    // for all other non-BODY elements
+                    xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+                    yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+                }
+                el = el.offsetParent;
+            }
+            return {x: xPos, y: yPos};
+        }
+
+        function hidePointer() {
+            pointer.style.visibility = "hidden";
+        }
+
+        function showPointer(imagePos, imageDir) {
+
+            const angleRad = Math.atan2(imageDir[0], imageDir[1]);
+            const angleDeg = Math.floor(180 * angleRad / Math.PI);
+
+            pointer.style.left = (imagePos[0] - 30) + "px";
+            pointer.style.top = (imagePos[1] - 30) + "px";
+            pointer.style.transform = "rotate(" + -(angleDeg - 45) + "deg)";
+            pointer.style.visibility = "visible";
+        }
+    
+  }
+}
+
 export default defineComponent({
   props: {
     model: {
@@ -163,12 +396,12 @@ export default defineComponent({
     return new VData();
   },
   beforeUpdate() {
-    console.log("BeforeUpdate");
+    console.log("VIEW BeforeUpdate");
         console.log(this.model);
     console.log(this.navMode);
   },
   updated() {
-    console.log("Updated");
+    console.log("VIEW Updated");
         console.log(this.model);
     console.log(this.navMode);
 
@@ -177,7 +410,7 @@ export default defineComponent({
 
   },
   async mounted() {
-    console.log("Mounted");
+    console.log("VIEW Mounted");
     console.log(this.navMode);
     console.log(this.model);
 
@@ -239,6 +472,13 @@ export default defineComponent({
     // this.viewer.scene.selectedMaterial.edgeAlpha = 0.6;
     // this.viewer.scene.selectedMaterial.edgeColor = [1, 0, 0];
 
+    // Add a this.storeyViewsPlugin
+    const ml:ModelLoader = new ModelLoader(this.viewer);
+    this.loader = ml;
+
+    this.storeyViewer = new SWGStoreyViewer(ml);
+    
+
     this.distanceMeasurements = new DistanceMeasurementsPlugin(this.viewer);
 
     // Add an XKTLoaderPlugin
@@ -274,15 +514,7 @@ export default defineComponent({
 
     this.createContextMenu();
 
-    
-    // if (this.nav.mlayout == "COMPACT") {
-    //   //document.getElementById('flrcpPANEL').style.display = 'none';
-    //   document.getElementById("actionDETAILS")!.style.display = "none";
-    //   document.getElementById("actionGOTO")!.style.display = "none";
-    //   document.getElementById("navmodeELEV")!.style.display = "none";
-    //   document.getElementById("itemId")!.style.display = "none";
-    //   document.getElementById("myNavCubeCanvas")!.style.display = "none";
-    // }
+  
   },
   methods: {
 
@@ -324,7 +556,7 @@ setObserverHeight(height: number) {
 
     LoadXKT() {
 
-      if( this.model == null || this.loader != null ) {
+      if( this.model == null ) {
         // Exit if we have loaded before / already
         return;
       }
@@ -351,14 +583,24 @@ setObserverHeight(height: number) {
     
     var entityId = this.itemId;
 
-    this.loader = new ModelLoader(this.viewer, this.model);
-    const ll = this.loader;
+    
 
-    this.loader.load(
+   // this.storeyViewer.init(this.loader);
+
+    const ll = this.loader!;
+    console.log("PRE, LOAD");
+    
+    this.loader!.load(this.model, 
 
       () => {
       
       console.log("LOADED CALLBACK");
+
+      var s = this.loader!.getStories();
+
+      var item = s[3];
+
+      this.storeyViewer?.show(item.id);
 
       const objectsMemento = new ObjectsMemento();
       objectsMemento.saveObjects(this.viewer.scene);
@@ -371,6 +613,10 @@ setObserverHeight(height: number) {
 
             camera.perspective.far = 20000;
             this.viewer.cameraFlight.flyTo(ll.modelparts[0]);
+
+    
+
+      
 return;
       if (entityId != "") {
         try {
@@ -438,7 +684,7 @@ return;
       //}
 
       //document.getElementById("show2D").onclick = (e) => { mode = "2d";
-      //  storeyViewsPlugin.showStoreyObjects(currentSId, {
+      //  this.storeyViewsPlugin.showStoreyObjects(currentSId, {
       //  hideOthers: true,
       //  useObjectStates: false
       //});
@@ -644,8 +890,7 @@ return;
       () => {
         if (canStandOnTypes[metaObjectTypeF]) {
           this.viewer.cameraControl.navMode = "firstPerson";
-          //document.getElementById("navFirstPerson").checked = true;
-          //document.getElementById("projPerspective").checked = true;
+        
           this.mode = "3d";
         } else {
           this.viewer.cameraFlight.flyTo(
@@ -655,8 +900,7 @@ return;
             },
             () => {
               this.viewer.cameraControl.navMode = "firstPerson";
-              //document.getElementById("navFirstPerson").checked = true;
-              //document.getElementById("projPerspective").checked = true;
+             
               this.mode = "3d";
             }
           );
@@ -953,22 +1197,11 @@ return;
 
     this.nav.mode = "FPV";
     this.nav.observerHeight = this.nav.standardHeight.person;
-    document.getElementById("navmodeFPV")!.style.backgroundColor = "#88F";
-    document.getElementById("navmodeDRONE")!.style.backgroundColor = "";
-    document.getElementById("navmodeORBIT")!.style.backgroundColor = "";
-    document.getElementById("navmodeORBITsub")!.style.display = "none";
-    if (this.nav.mlayout != "COMPACT") {
-      document.getElementById("navmodeFPVsub")!.style.display = "";
-    }
-
+  
     if (this.GUISETTING_cutplanes) {
       this.GUI_togglecutplane(); //Turn OFF floor cutplanes.
     }
 
-    //document.getElementById("navmodeORBITmoveout").style.display = 'none';
-    //document.getElementById("navmodeORBITmovein").style.display = 'none';
-    //document.getElementById("navmodeORBITrotccw").style.display = 'none';
-    //document.getElementById("navmodeORBITrotcw").style.display = 'none';
     if (IFC_Y_cm == null) {
       this.GUI_navSetCameraXY(
         this.viewer.scene.camera.eye[0] * 1,
@@ -982,21 +1215,12 @@ return;
   GUI_navmodeDRONE(IFC_x_cm, IFC_Y_cm) {
     this.nav.mode = "DRONE";
     this.nav.observerHeight = this.nav.standardHeight.drone;
-    document.getElementById("navmodeFPV")!.style.backgroundColor = "";
-    document.getElementById("navmodeDRONE")!.style.backgroundColor = "#88F";
-    document.getElementById("navmodeORBIT")!.style.backgroundColor = "";
-
-    document.getElementById("navmodeORBITsub")!.style.display = "none";
-    document.getElementById("navmodeFPVsub")!.style.display = "none";
-
+    
     if (this.GUISETTING_cutplanes == false) {
       this.GUI_togglecutplane(); //Turn ON floor cutplanes.
     }
 
-    //document.getElementById("navmodeORBITmoveout").style.display = 'none';
-    //document.getElementById("navmodeORBITmovein").style.display = 'none';
-    //document.getElementById("navmodeORBITrotccw").style.display = 'none';
-    //document.getElementById("navmodeORBITrotcw").style.display = 'none';
+   
     if (IFC_Y_cm == null) {
       this.GUI_navSetCameraXY(
         this.viewer.scene.camera.eye[0] * 1,
@@ -1016,10 +1240,6 @@ return;
       this.GUI_togglecutplane(); //Turn OFF floor cutplanes.
     }
 
-    //document.getElementById("navmodeORBITmoveout").style.display = '';
-    //document.getElementById("navmodeORBITmovein").style.display = '';
-    //document.getElementById("navmodeORBITrotccw").style.display = '';
-    //document.getElementById("navmodeORBITrotcw").style.display = '';
     if (IFC_Y_cm == null) {
       this.GUI_navSetCameraXY(
         this.viewer.scene.camera.eye[0] * 1,
@@ -1033,26 +1253,13 @@ return;
   GUI_togglecutplane() {
     if (this.GUISETTING_cutplanes) {
       this.GUISETTING_cutplanes = false;
-      document.getElementById("flrcpTOGGLE")!.style.backgroundColor = "";
+
       this.sectionPlanes.clear();
-      document.getElementById("navmodeCUTPsub")!.style.display = "none";
-      //document.getElementById("flrcpCD").style.display = 'none';
-      //document.getElementById("flrcpCU").style.display = 'none';
-      //document.getElementById("flrcpFD").style.display = 'none';
-      //document.getElementById("flrcpFU").style.display = 'none';
+
+      
     } else {
       this.GUISETTING_cutplanes = true;
-      document.getElementById("navmodeCUTPsub")!.style.display = "";
-      //document.getElementById("flrcpCD").style.display = '';
-      //document.getElementById("flrcpCU").style.display = '';
-      //document.getElementById("flrcpFD").style.display = '';
-      //document.getElementById("flrcpFU").style.display = '';
-
-      document.getElementById("flrcpTOGGLE")!.style.backgroundColor = "#007";
-
-      //document.getElementById("floorSections").onclick = (e) => {
-
-      //        viewer.scene.camera.look = [model.cen.x * model.scaleRes, model.cen.y * model.scaleRes, model.cen.z * model.scaleRes];
+      
       if (this.model!.cutPlane.lower != 0) {
         this.sectionPlanes.clear();
         this.sectionPlanes.createSectionPlane({
@@ -1213,7 +1420,7 @@ return;
     this.model!.cutPlane.upper = elevation2 * 1.0;
     this.GUISETTING_cutplanes = false;
     this.GUI_togglecutplane();
-    document.getElementById("navmodeELEV")!.innerHTML = flrCode;
+    
     //When change floor force the camera to be the elevation +1.5m
     //alert(this.nav.current_elev + ' eyez=' + viewer.scene.camera.eye[2]);
     //viewer.scene.camera.look = [viewer.scene.camera.look[0], viewer.scene.camera.look[1], (this.nav.current_elev * 0.1) + this.nav.observerHeight];
@@ -1228,7 +1435,7 @@ return;
     //  var elevation1 = document.getElementById("navFLRLST").value;
     //  var flrcode = document.getElementById("navFLRLST").options[document.getElementById("navFLRLST").selectedIndex].text;
 
-    var SVGelement = document.getElementById("navELEVATIONgraphic");
+
 
     if (e.srcElement) {
       var flrcode = e.srcElement.id;
@@ -1344,68 +1551,6 @@ return;
 },
 
 
- GUI_BIRDSEYEmag(e) {
-    //alert(e.target.id);
-    var SVGelement = document.getElementById('navBIRDSEYEdiv')?.children[0] as SVGSVGElement;
-    if (e.target.id == 'navBIRDSEYEmagFit') {
-        this.model!.birdsEye.boxScale = 1.0;
-        SVGelement.style.width = '100%';
-        SVGelement.style.height = '100%';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx2') {
-        this.model!.birdsEye.boxScale = 2.0;
-        SVGelement.style.width = '200%';
-        SVGelement.style.height = '200%';
-        SVGelement.style.marginTop = '-100px';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx4') {
-        this.model!.birdsEye.boxScale = 4.0;
-        SVGelement.style.width = '400%';
-        SVGelement.style.height = '400%';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx8') {
-        this.model!.birdsEye.boxScale = 8.0;
-        SVGelement.style.width = '800%';
-        SVGelement.style.height = '800%';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx16') {
-        this.model!.birdsEye.boxScale = 16.0;
-        SVGelement.style.width = '1600%';
-        SVGelement.style.height = '1600%';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx32') {
-        this.model!.birdsEye.boxScale = 32.0;
-        SVGelement.style.width = '3200%';
-        SVGelement.style.height = '3200%';
-    }
-    if (e.target.id == 'navBIRDSEYEmagx64') {
-        this.model!.birdsEye.boxScale = 64.0;
-        SVGelement.style.width = '6400%';
-        SVGelement.style.height = '6400%';
-    }
-    // The cursor point, translated into screen coordinates - 
-    var SVGbound = SVGelement.getBoundingClientRect();
-    var pt = SVGelement.createSVGPoint();
-    //var viewbox = SVGelement.getAttribute('viewBox').split(" ");
-    //var viewboxminy = viewbox[1];
-    //var viewboxhgt = viewbox[3];
-    //var SVGtruminy = (viewboxminy * 1) + (viewboxhgt * 1);
-    
-    pt.x = Number(document.getElementById("SVGPOSCAM")?.getAttribute("cx")) * 1;
-    pt.y = Number(document.getElementById("SVGPOSCAM")?.getAttribute("cy")) * 1;
-       
-       
-       // TODO
-    // var cursorpt = pt.matrixTransform(SVGelement.getScreenCTM());
-    // var CAMpxposY = cursorpt.y - SVGbound.top;
-    // var CAMpxposX = cursorpt.x - SVGbound.left;
-    // //alert('CAMpxposY=' + CAMpxposY + ' SVGbound.height=' + SVGbound.height);
-    // SVGelement.style.marginTop = ((((SVGbound.height / this.model!.birdsEye.boxScale) * 0.5) - CAMpxposY)) + 'px';
-    // SVGelement.style.marginLeft = ((((SVGbound.width / this.model!.birdsEye.boxScale) * 0.5) - CAMpxposX)) + 'px';
-
-    this.GUI_setSVGassetpos();
-},
-
 
 
  GUI_navmodePARTS(e) {
@@ -1417,12 +1562,12 @@ return;
         //var p0 = performance.now();
         //document.getElementById("stats2").innerHTML = "Loading this.model 2...";
 
-        this.loader.loadPart(partIndex, e.target.value);
+        this.loader!.loadPart(partIndex, e.target.value);
 
         
     } else {
         //alert('turn off' + e.target.value);
-        this.loader.removePart(partIndex);
+        this.loader!.removePart(partIndex);
     }
 },
 
@@ -1603,18 +1748,18 @@ GUI_actionGOTO(targetID: string) {
     }
 
     //if (mode == "2d") {
-    //  storeyViewsPlugin.showStoreyObjects(currentSId, {
+    //  this.storeyViewsPlugin.showStoreyObjects(currentSId, {
     //    hideOthers: true,
     //    useObjectStates: false
     //  });
     //}
 
     //if (mode == "2d") {
-    //  storeyViewsPlugin.showStoreyObjects(currentSId, {
+    //  this.storeyViewsPlugin.showStoreyObjects(currentSId, {
     //    hideOthers: true,
     //    useObjectStates: false
     //  });
-    //  storeyViewsPlugin.gotoStoreyCamera(currentSId, {
+    //  this.storeyViewsPlugin.gotoStoreyCamera(currentSId, {
     //    projection: "ortho",
     //    done: () => {
     //      this.viewer.cameraControl.navMode = "planView"; // Disable rotation
@@ -1628,7 +1773,7 @@ GUI_actionGOTO(targetID: string) {
     //    }
     //  });
     //} else if (mode == "3dOf2d") {
-    //  storeyViewsPlugin.gotoStoreyCamera(currentSId, {
+    //  this.storeyViewsPlugin.gotoStoreyCamera(currentSId, {
     //    projection: "perspective",
     //    done: () => {
     //      document.getElementById("projPerspective").checked = true;

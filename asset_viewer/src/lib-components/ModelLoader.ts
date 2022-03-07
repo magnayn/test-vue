@@ -12,6 +12,8 @@ import {
     CameraMemento,
     math,
     Entity,
+    MetaObject,
+    MetaScene,
     XKTLoaderPlugin,
   } from "@xeokit/xeokit-sdk/dist/xeokit-sdk.es.js";
 import AssetDBClient from "./AssetDBClient";
@@ -35,13 +37,13 @@ import AssetDBClient from "./AssetDBClient";
 */
 
 
-
+ 
 
 export default class ModelLoader {
 
-    constructor(viewer:Viewer, model) {
+    constructor(viewer:Viewer) {
       this.xktLoader = new XKTLoaderPlugin(viewer);
-      this.model = model;
+
       this.viewer = viewer;
     }
   
@@ -51,14 +53,19 @@ export default class ModelLoader {
     modelrooms: any[] = [];
     xktLoader: any;
   
-    model: ModelInfo;
+    model?: ModelInfo;
   
     get assetDBClient():AssetDBClient {
-        return this.model.assetDBClient;
+        return this.model?.assetDBClient;
     }
 
 
-    load(callback) {
+    load(model:ModelInfo, callback) {
+
+      console.log(">>> LOAD MODEL");
+
+      this.model = model;
+
       var modelinitialIndex = 0;
       var max: number = this.model.partsCount;
       var i: number;
@@ -134,13 +141,39 @@ export default class ModelLoader {
 
       console.log("Part Loaded");
       console.log(entity);
+      console.log(entity.id);
+      console.log(entity.entityList);
 
-      this.modelparts[modelinitialIndex].on("loaded", callback);
-      
-      
+      console.log(this.viewer);
 
+  
+
+      this.modelparts[modelinitialIndex].on("loaded", () => { 
+        var ms:MetaScene = this.viewer.metaScene;
+        this.model!.metaScene = ms;
+        this.model!.floorList = this.getStories();
+        callback(); 
+      }
+      );
+      
     }
   
+    getStories():any[] {
+      var ms:MetaScene = this.viewer.metaScene;
+      var mobt = ms.metaObjectsByType;
+
+      var ko = mobt.IfcBuildingStorey;
+
+      var stories:any[] = [];
+
+      for (const k in ko)
+      {
+        stories = stories.concat( { id: k, name: ko[k].name} );
+      }
+   
+      return stories;
+    }
+
     loadPart(partIndex, name) {
       this.modelparts[partIndex] = this.xktLoader.load({
               //this.model2 = xktLoader.load({
