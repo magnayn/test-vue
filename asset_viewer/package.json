@@ -1,7 +1,7 @@
 {
   "name": "@swg/lib",
   "description": "UI Components for SWG",
-  "version": "0.2.5-prerelease.13",
+  "version": "0.2.5-prerelease.15",
   "main": "dist/wooyay.ssr.js",
   "browser": "dist/wooyay.esm.js",
   "module": "dist/wooyay.esm.js",
@@ -25,7 +25,8 @@
   "dependencies": {
     "@xeokit/xeokit-sdk": "^2.2.3",
     "asciify-image": "^0.1.8",
-    "core-js": "^3.6.5"
+    "core-js": "^3.6.5",
+    "element-plus": "^2.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
@@ -54,6 +55,7 @@
     "rollup-plugin-vue": "^6.0.0",
     "ttypescript": "^1.5.12",
     "typescript": "^4.0.3",
+    "unplugin-element-plus": "^0.3.1",
     "vue": "^3.2.21"
   },
   "eslintConfig": {

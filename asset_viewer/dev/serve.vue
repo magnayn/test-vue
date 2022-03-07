@@ -4,10 +4,8 @@ import { defineComponent } from 'vue';
 // import { WooyaySample } from '@/entry.esm';
 import { AssetViewer, AssetViewToolbar} from '@/entry.esm';
 import AssetDBClient from '../src/lib-components/AssetDBClient';
+import { ElButton } from 'element-plus';
 
-// 5e25c97d-3678-463a-b105-287a31af763f&models=
-// bd19fc4c-b086-47db-beea-8ff13ccc9f00&models=
-//f39a67a5-2e02-4799-bf83-dd7a43e4abc2&models=541871c3-ae3e-422e-a237-acf7f584c16e
 
 const client = new AssetDBClient( {
             baseUrl: "https://apim-assetdb-dev.azure-api.net/asset",
@@ -19,7 +17,8 @@ export default defineComponent({
   name: 'ServeDev',
    components: {
     AssetViewer,
-    AssetViewToolbar
+    AssetViewToolbar,
+    ElButton
    },
    data() { return {
      xkt: "http://localhost:8080/assets/Duplex.ifc.xkt",
@@ -36,8 +35,21 @@ export default defineComponent({
 </style>
 
 <template>
-
-    
+ <el-button>I am ElButton</el-button>
+     <el-dropdown class="m-4" type="primary">
+    <el-button type="primary" plain>
+      Dropdown List<el-icon class="el-icon--right"><arrow-down /></el-icon>
+    </el-button>
+    <template #dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item>Action 1</el-dropdown-item>
+        <el-dropdown-item>Action 2</el-dropdown-item>
+        <el-dropdown-item>Action 3</el-dropdown-item>
+        <el-dropdown-item>Action 4</el-dropdown-item>
+        <el-dropdown-item>Action 5</el-dropdown-item>
+      </el-dropdown-menu>
+    </template>
+  </el-dropdown>
      <asset-viewer :xkt="xkt" :client="client"></asset-viewer>
 
 

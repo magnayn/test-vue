@@ -13,6 +13,7 @@ import ttypescript from 'ttypescript';
 import typescript from 'rollup-plugin-typescript2';
 import minimist from 'minimist';
 import image from '@rollup/plugin-image';
+import ElementPlus from 'unplugin-element-plus/rollup'
 
 // Get browserslist config and remove ie from es build targets
 const esbrowserslist = fs.readFileSync('./.browserslistrc')
@@ -121,64 +122,73 @@ if (!argv.format || argv.format === 'es') {
           ],
         ],
       }),
-      image()
+      image(),
+      // ElementPlus({
+      //   // options
+      // }),
     ],
   };
   buildFormats.push(esConfig);
 }
 
-if (!argv.format || argv.format === 'cjs') {
-  const umdConfig = {
-    ...baseConfig,
-    external,
-    output: {
-      compact: true,
-      file: 'dist/wooyay.ssr.js',
-      format: 'cjs',
-      name: 'Wooyay',
-      exports: 'auto',
-      globals,
-    },
-    plugins: [
-      replace(baseConfig.plugins.replace),
-      ...baseConfig.plugins.preVue,
-      vue(baseConfig.plugins.vue),
-      ...baseConfig.plugins.postVue,
-      babel(baseConfig.plugins.babel),
-      image()
-    ],
-  };
-  buildFormats.push(umdConfig);
-}
+// if (!argv.format || argv.format === 'cjs') {
+//   const umdConfig = {
+//     ...baseConfig,
+//     external,
+//     output: {
+//       compact: true,
+//       file: 'dist/wooyay.ssr.js',
+//       format: 'cjs',
+//       name: 'Wooyay',
+//       exports: 'auto',
+//       globals,
+//     },
+//     plugins: [
+//       replace(baseConfig.plugins.replace),
+//       ...baseConfig.plugins.preVue,
+//       vue(baseConfig.plugins.vue),
+//       ...baseConfig.plugins.postVue,
+//       babel(baseConfig.plugins.babel),
+//       image(),
+//       ElementPlus({
+//         // options
+//       }),
+//     ],
+//   };
+//   buildFormats.push(umdConfig);
+// }
 
-if (!argv.format || argv.format === 'iife') {
-  const unpkgConfig = {
-    ...baseConfig,
-    external,
-    output: {
-      compact: true,
-      file: 'dist/wooyay.min.js',
-      format: 'iife',
-      name: 'Wooyay',
-      exports: 'auto',
-      globals,
-    },
-    plugins: [
-      replace(baseConfig.plugins.replace),
-      ...baseConfig.plugins.preVue,
-      vue(baseConfig.plugins.vue),
-      ...baseConfig.plugins.postVue,
-      babel(baseConfig.plugins.babel),
-      terser({
-        output: {
-          ecma: 5,
-        },
-      }),
-      image()
-    ],
-  };
-  buildFormats.push(unpkgConfig);
-}
+// if (!argv.format || argv.format === 'iife') {
+//   const unpkgConfig = {
+//     ...baseConfig,
+//     external,
+//     output: {
+//       compact: true,
+//       file: 'dist/wooyay.min.js',
+//       format: 'iife',
+//       name: 'Wooyay',
+//       exports: 'auto',
+//       globals,
+//     },
+//     plugins: [
+//       replace(baseConfig.plugins.replace),
+//       ...baseConfig.plugins.preVue,
+//       vue(baseConfig.plugins.vue),
+//       ...baseConfig.plugins.postVue,
+//       babel(baseConfig.plugins.babel),
+//       terser({
+//         output: {
+//           ecma: 5,
+//         },
+//       }),
+//       image(),
+//       ElementPlus({
+//         // options
+//       }),
+//     ],
+//   };
+//   buildFormats.push(unpkgConfig);
+// }
 
 // Export config
 export default buildFormats;

@@ -4,6 +4,7 @@
     {{ item.name }}
   </li>
 </div>
+ <el-button>I am ElButton</el-button>
   <toolbar>
 
 
@@ -252,6 +253,8 @@ import ICON_orbit_move_toward from "../assets/IMAGES/ICON_orbit_move_toward.png"
 import ICON_orbit_rotate_ccw from "../assets/IMAGES/ICON_orbit_rotate_ccw.png";
 import ICON_orbit_rotate_cw from "../assets/IMAGES/ICON_orbit_rotate_cw.png";
 
+import { ElButton } from 'element-plus';
+
 export default defineComponent({
   props: {
     navMode: String,
@@ -259,7 +262,7 @@ export default defineComponent({
       type: Object as () => ModelInfo | null,
     },
   },
-  components: { ToolbarButton, Toolbar },
+  components: { ToolbarButton, Toolbar,     ElButton },
   updated() {
     console.log(this.model);
   },
